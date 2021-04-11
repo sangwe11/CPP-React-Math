@@ -1,5 +1,5 @@
-#ifndef _RM_MATRIX_H
-#define _RM_MATRIX_H
+#ifndef _RM_COMMOM_H
+#define _RM_COMMON_H
 
 #include <cassert>
 
