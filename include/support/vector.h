@@ -8,29 +8,17 @@
 #include <cassert>
 #include <algorithm>
 
+#include "common.h"
+
 namespace react
 {
 	namespace support
 	{
-		template<typename T, size_t S>
-		struct check_dimension
-		{
-			static_assert(S >= 2, "size_t >= 2.");
-			using type = T;
-		};
-
-		template<typename T>
-		struct check_type
-		{
-			static_assert(std::is_arithmetic<T>::value, "T is arithmetic");
-			using type = T;
-		};
-
 		template <size_t S, typename T = float>
 		class vector
 		{
 		private:
-			typename check_dimension<T, S>::type cd{};
+			typename check_vec_dimension<T, S>::type cd{};
 			typename check_type<T>::type ct{};
 
 		public:

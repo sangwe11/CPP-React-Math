@@ -3,6 +3,7 @@ project (CPP-React-Math)
 
 set (PROJECT_SOURCES
 	React-Math.h
+	support/common.h
 	support/vector.h
 	vec2.h
 	vec3.h
