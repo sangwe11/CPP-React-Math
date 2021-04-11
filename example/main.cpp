@@ -13,6 +13,8 @@ int main()
 
 	react::vec3f::type f = react::vec3f::angle(up, right);
 
+	react::vec3f a_on_up = a.project_on_plane(up);
+
 	std::cout << "A: (" << a << ")" << std::endl;
 	std::cout << "B: (" << b << ")" << std::endl;
 	std::cout << "cross(A, B) = (" << c << ")" << std::endl;
@@ -20,6 +22,7 @@ int main()
 	std::cout << "up: (" << up << ")" << std::endl;
 	std::cout << "right: (" << right << ")" << std::endl;
 	std::cout << "angle(up, right) = " << f << " radians" << std::endl;
+	std::cout << "project_on_plane(a, up) = " << "(" << a_on_up << ")" << std::endl;
 
 	return 0;
 }

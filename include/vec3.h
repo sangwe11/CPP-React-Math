@@ -52,6 +52,12 @@ namespace react
 	}
 
 	template <typename T>
+	const vec3<T> vec3<T>::project_on_plane(const vec3<T>& normal) const
+	{
+		return project_on_plane(*this, normal);
+	}
+
+	template <typename T>
 	const vec3<T> vec3<T>::reflect(const vec3<T>& normal) const
 	{
 		return reflect(*this, normal);
@@ -67,6 +73,12 @@ namespace react
 	const vec3<T> vec3<T>::cross(const vec3<T>& a, const vec3<T>& b)
 	{
 		return vec3<T>(a.m_data[1] * b.m_data[2] - a.m_data[2] * b.m_data[1], a.m_data[2] * b.m_data[0] - a.m_data[0] * b.m_data[2], a.m_data[0] * b.m_data[1] - a.m_data[1] * b.m_data[0]);
+	}
+
+	template <typename T>
+	const vec3<T> vec3<T>::project_on_plane(const vec3<T>& v, const vec3<T>& normal)
+	{
+		return v - (v.dot(normal) * normal);
 	}
 
 	template <typename T>
