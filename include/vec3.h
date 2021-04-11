@@ -110,12 +110,4 @@ namespace react
 #endif
 }
 
-/*
-	// Utility functions
-	const vec3<T> project_on_plane(const vec3<T>& normal) const;
-
-	// Static utility functions
-	static const vec3<T> project_on_plane(const vec3<T>& v, const vec3<T>& normal);
-	*/
-
 #endif

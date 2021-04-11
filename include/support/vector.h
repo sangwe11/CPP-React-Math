@@ -35,6 +35,7 @@ namespace react
 
 		public:
 			static const size_t DIMENSION = S;
+			using type = T;
 
 			// SFINAE
 			template <typename TT>
@@ -168,7 +169,7 @@ namespace react
 		};
 
 		template <size_t S, typename T>
-		vector<S, T>::vector(const T & a)
+		vector<S, T>::vector(const T& a)
 		{
 			for (int i = 0; i < this->DIMENSION; ++i)
 				m_data[i] = a;
@@ -176,7 +177,7 @@ namespace react
 
 		template <size_t S, typename T>
 		template <typename TT>
-		vector<S, T>::vector(const T & x, const T & y, const T & z, const T & w)
+		vector<S, T>::vector(const T& x, const T& y, const T& z, const T& w)
 		{
 			m_data[0] = x;
 			m_data[1] = y;
@@ -312,13 +313,13 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		const bool vector<S, T>::operator==(const vector<S, T> & other) const
+		const bool vector<S, T>::operator==(const vector<S, T>& other) const
 		{
 			return std::memcmp(m_data, other.m_data, sizeof(m_data)) == 0;
 		}
 
 		template <size_t S, typename T>
-		const bool vector<S, T>::operator!=(const vector<S, T> & other) const
+		const bool vector<S, T>::operator!=(const vector<S, T>& other) const
 		{
 			return !(*this == other);
 		}
@@ -342,7 +343,7 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		vector<S, T>& vector<S, T>::operator+=(const vector<S, T> & v)
+		vector<S, T>& vector<S, T>::operator+=(const vector<S, T>& v)
 		{
 			for (int i = 0; i < this->DIMENSION; ++i)
 				m_data[i] += v.m_data[i];
@@ -351,7 +352,7 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		vector<S, T>& vector<S, T>::operator-=(const vector<S, T> & v)
+		vector<S, T>& vector<S, T>::operator-=(const vector<S, T>& v)
 		{
 			for (int i = 0; i < this->DIMENSION; ++i)
 				m_data[i] -= v.m_data[i];
@@ -360,7 +361,7 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		vector<S, T>& vector<S, T>::operator*=(const vector<S, T> & v)
+		vector<S, T>& vector<S, T>::operator*=(const vector<S, T>& v)
 		{
 			for (int i = 0; i < this->DIMENSION; ++i)
 				m_data[i] *= v.m_data[i];
@@ -369,7 +370,7 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		vector<S, T>& vector<S, T>::operator/=(const vector<S, T> & v)
+		vector<S, T>& vector<S, T>::operator/=(const vector<S, T>& v)
 		{
 			for (int i = 0; i < this->DIMENSION; ++i)
 				m_data[i] /= v.m_data[i];
@@ -378,7 +379,7 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		vector<S, T>& vector<S, T>::operator*=(const T & c)
+		vector<S, T>& vector<S, T>::operator*=(const T& c)
 		{
 			for (int i = 0; i < this->DIMENSION; ++i)
 				m_data[i] *= c;
@@ -387,7 +388,7 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		vector<S, T>& vector<S, T>::operator/=(const T & c)
+		vector<S, T>& vector<S, T>::operator/=(const T& c)
 		{
 			for (int i = 0; i < this->DIMENSION; ++i)
 				m_data[i] /= c;
@@ -396,7 +397,7 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		vector<S, T> vector<S, T>::operator+(const vector<S, T> & v) const
+		vector<S, T> vector<S, T>::operator+(const vector<S, T>& v) const
 		{
 			vector<S, T> tmp = v;
 			tmp += *this;
@@ -404,7 +405,7 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		vector<S, T> vector<S, T>::operator-(const vector<S, T> & v) const
+		vector<S, T> vector<S, T>::operator-(const vector<S, T>& v) const
 		{
 			vector<S, T> tmp = v;
 			tmp -= *this;
@@ -412,7 +413,7 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		vector<S, T> vector<S, T>::operator*(const vector<S, T> & v) const
+		vector<S, T> vector<S, T>::operator*(const vector<S, T>& v) const
 		{
 			vector<S, T> tmp = v;
 			tmp *= *this;
@@ -420,13 +421,13 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		inline vector<S, T> operator*(const T & c, const vector<S, T> & v)
+		inline vector<S, T> operator*(const T& c, const vector<S, T>& v)
 		{
 			return v * c;
 		}
 
 		template <size_t S, typename T>
-		vector<S, T> vector<S, T>::operator/(const vector<S, T> & v) const
+		vector<S, T> vector<S, T>::operator/(const vector<S, T>& v) const
 		{
 			vector<S, T> tmp = v;
 			tmp /= *this;
@@ -434,7 +435,7 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		vector<S, T> vector<S, T>::operator*(const T & c) const
+		vector<S, T> vector<S, T>::operator*(const T& c) const
 		{
 			vector<S, T> tmp = *this;
 			tmp *= c;
@@ -442,7 +443,7 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		vector<S, T> vector<S, T>::operator/(const T & c) const
+		vector<S, T> vector<S, T>::operator/(const T& c) const
 		{
 			vector<S, T> tmp = *this;
 			tmp /= c;
@@ -450,19 +451,19 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		const T vector<S, T>::angle(const vector<S, T> & b) const
+		const T vector<S, T>::angle(const vector<S, T>& b) const
 		{
 			return angle(*this, b);
 		}
 
 		template <size_t S, typename T>
-		const T vector<S, T>::dot(const vector & v) const
+		const T vector<S, T>::dot(const vector& v) const
 		{
 			return dot(*this, v);
 		}
 
 		template <size_t S, typename T>
-		const T vector<S, T>::distance(const vector<S, T> & v) const
+		const T vector<S, T>::distance(const vector<S, T>& v) const
 		{
 			return distance(*this, v);
 		}
@@ -480,7 +481,7 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		const vector<S, T> vector<S, T>::lerp(const vector<S, T> & b, const T & t) const
+		const vector<S, T> vector<S, T>::lerp(const vector<S, T>& b, const T& t) const
 		{
 			return lerp(*this, b, t);
 		}
@@ -492,7 +493,7 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		const vector<S, T> vector<S, T>::project(const vector<S, T> & v) const
+		const vector<S, T> vector<S, T>::project(const vector<S, T>& v) const
 		{
 			return project(*this, v);
 		}
@@ -511,13 +512,13 @@ namespace react
 		// Vector static declarations
 
 		template <size_t S, typename T>
-		const T vector<S, T>::angle(const vector<S, T> & a, const vector<S, T> & b)
+		const T vector<S, T>::angle(const vector<S, T>& a, const vector<S, T>& b)
 		{
 			return acos(a.dot(b) / (a.length() * b.length()));
 		}
 
 		template <size_t S, typename T>
-		const T vector<S, T>::dot(const vector<S, T> & a, const vector<S, T> & b)
+		const T vector<S, T>::dot(const vector<S, T>& a, const vector<S, T>& b)
 		{
 			T tmp = 0;
 
@@ -528,13 +529,13 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		const T vector<S, T>::distance(const vector<S, T> & a, const vector<S, T> & b)
+		const T vector<S, T>::distance(const vector<S, T>& a, const vector<S, T>& b)
 		{
 			return (a - b).length();
 		}
 
 		template <size_t S, typename T>
-		const T vector<S, T>::length_squared(const vector<S, T> & v)
+		const T vector<S, T>::length_squared(const vector<S, T>& v)
 		{
 			T tmp = 0;
 
@@ -545,13 +546,13 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		const T vector<S, T>::length(const vector<S, T> & v)
+		const T vector<S, T>::length(const vector<S, T>& v)
 		{
 			return sqrt(length_squared(v));
 		}
 
 		template <size_t S, typename T>
-		static const vector<S, T> vector<S, T>::lerp(const vector<S, T> & a, const vector<S, T> & b, const T & t)
+		static const vector<S, T> vector<S, T>::lerp(const vector<S, T>& a, const vector<S, T>& b, const T& t)
 		{
 			vector<S, T> tmp;
 
@@ -562,7 +563,7 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		static const vector<S, T> vector<S, T>::max(const vector<S, T> & a, const vector<S, T> & b)
+		static const vector<S, T> vector<S, T>::max(const vector<S, T>& a, const vector<S, T>& b)
 		{
 			vector<S, T> tmp;
 
@@ -573,7 +574,7 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		static const vector<S, T> vector<S, T>::min(const vector<S, T> & a, const vector<S, T> & b)
+		static const vector<S, T> vector<S, T>::min(const vector<S, T>& a, const vector<S, T>& b)
 		{
 			vector<S, T> tmp;
 
@@ -584,13 +585,13 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		const vector<S, T> vector<S, T>::normalized(const vector<S, T> & a)
+		const vector<S, T> vector<S, T>::normalized(const vector<S, T>& a)
 		{
 			return a / a.length();
 		}
 
 		template <size_t S, typename T>
-		const vector<S, T> vector<S, T>::project(const vector<S, T> & a, const vector<S, T> & b)
+		const vector<S, T> vector<S, T>::project(const vector<S, T>& a, const vector<S, T>& b)
 		{
 			return (a.dot(b) / a.length_squared()) * a;
 		}
