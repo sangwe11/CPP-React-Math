@@ -40,6 +40,8 @@ namespace react
 			template <typename TT = enable_if_square<T>>
 			const matrix<M, N, T> inverse() const;
 
+			const bool invertible() const;
+
 			template <size_t MM, size_t NN, typename TT>
 			const matrix<MM, NN, TT> sub_matrix(const size_t &row_start, const size_t& col_start) const;
 
@@ -175,6 +177,8 @@ namespace react
 		template <typename TT>
 		const matrix<M, N, T> matrix<M, N, T>::inverse() const
 		{
+			assert(invertible());
+
 			matrix<M, N * 2, T> tmp(*this);
 
 			// Set right half to identity
@@ -183,9 +187,6 @@ namespace react
 
 			for (int i = 0; i < M; ++i)
 			{
-				if (tmp.at(i, i) == 0)
-					std::cout << "ERROR" << std::endl;
-
 				for (int j = 0; j < N; ++j)
 				{
 					if (i != j)
@@ -209,6 +210,19 @@ namespace react
 			}
 
 			return tmp.sub_matrix<M, N, T>(0, N);
+		}
+
+		template <size_t M, size_t N, typename T>
+		const bool matrix<M, N, T>::invertible() const
+		{
+			if (M != N)
+				return false;
+
+			for (int i = 0; i < M; ++i)
+				if (at(i, i) == 0)
+					return false;
+
+			return true;
 		}
 
 		template <size_t M, size_t N, typename T>
