@@ -22,6 +22,9 @@ namespace react
 			template <typename TT>
 			using enable_if_square = typename std::enable_if<M == N, TT>::type;
 
+			template <typename TT>
+			using enable_if_reducible = typename std::enable_if<M >= 3 && N >= 3, TT >::type;
+
 			matrix();
 			explicit matrix(const T& a);
 
@@ -45,8 +48,19 @@ namespace react
 			template <size_t MM, size_t NN, typename TT>
 			const matrix<MM, NN, TT> sub_matrix(const size_t &row_start, const size_t& col_start) const;
 
+			template <typename TT = enable_if_reducible<T>>
+			const matrix<M - 1, N - 1, T> reduce(const size_t &ignore_row, const size_t &ignore_col) const;
+
+			void set(T* data, size_t size);
+
 			// Static utility functions
 			const static matrix<N, M, T> transpose(const matrix<M, N, T> &m);
+
+			template <size_t NN, typename TT>
+			const static TT determinant(const matrix<NN, NN, TT>& m);
+
+			template <typename TT>
+			const static TT determinant(const matrix<2, 2, TT>& m);
 
 			// Static instantiator
 			template <typename TT = enable_if_square<T>>
@@ -243,9 +257,65 @@ namespace react
 		}
 
 		template <size_t M, size_t N, typename T>
+		template <typename TT>
+		const matrix<M - 1, N - 1, T> matrix<M, N, T>::reduce(const size_t& ignore_row, const size_t& ignore_col) const
+		{
+			matrix<M - 1, N - 1, T> sub_matrix = matrix<M - 1, N - 1, T>::ZERO;
+
+			int subi = 0;
+
+			for (int i = 0; i < M; ++i)
+			{	
+				int subj = 0;
+
+				if (i == ignore_row)
+					continue;
+
+				for (int j = 0; j < N; ++j)
+				{
+					if (j == ignore_col)
+						continue;
+
+					sub_matrix.at(subi, subj) = at(i, j);
+					++subj;
+				}
+
+				++subi;
+			}
+
+			return sub_matrix;
+		}
+
+		template <size_t M, size_t N, typename T>
+		void matrix<M, N, T>::set(T* data, size_t size)
+		{
+			size_t len = std::min(size, M * N);
+			std::memcpy(m_data, data, len * sizeof(T));
+		}
+
+		template <size_t M, size_t N, typename T>
 		const static matrix<N, M, T> matrix<M, N, T>::transpose(const matrix<M, N, T>& m)
 		{
 			return m.transpose();
+		}
+
+		template <size_t M, size_t N, typename T>
+		template <typename TT>
+		const static TT matrix<M, N, T>::determinant(const matrix<2, 2, TT>& m)
+		{
+			return m.at(0, 0) * m.at(1, 1) - m.at(1, 0) * m.at(0, 1);
+		}
+
+		template <size_t M, size_t N, typename T>
+		template <size_t NN, typename TT>
+		const static TT matrix<M, N, T>::determinant(const matrix<NN, NN, TT>& m)
+		{
+			TT det = 0;
+
+			for (int x = 0; x < NN; ++x)
+				det += (x % 2 == 0 ? 1 : -1) * m.at(0, x) * determinant(m.reduce(0, x));
+
+			return det;
 		}
 
 		template <size_t M, size_t N, typename T>
