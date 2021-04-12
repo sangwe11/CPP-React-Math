@@ -19,6 +19,13 @@ namespace react
 		{
 			static_assert(S >= 2, "vector dimension must be >= 2.");
 			using type = T;
+		};
+
+		template<typename T, size_t M, size_t N>
+		struct check_mat_dimension
+		{
+			static_assert(M >= 2 && N >= 2, "matrix dimension must be >= 2 x 2");
+			using type = T;
 		};		
 	}
 }
