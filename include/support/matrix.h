@@ -34,7 +34,7 @@ namespace react
 			// Accessors
 			inline T& at(const size_t& row_index, const size_t& col_index);
 			inline const T& at(const size_t& row_index, const size_t& col_index) const;
-			const vector<N, T> row(const size_t& row_index) const;
+			const vector<M, T> row(const size_t& row_index) const;
 			const vector<N, T> col(const size_t& col_index) const;
 
 			// Utility functions
@@ -53,14 +53,14 @@ namespace react
 
 			void set(T* data, size_t size);
 
+			matrix<M, N, T>& swap_row(const size_t& row1, const size_t& row2);
+			matrix<M, N, T>& swap_col(const size_t& col1, const size_t& col2);
+
 			// Static utility functions
 			const static matrix<N, M, T> transpose(const matrix<M, N, T> &m);
 
 			template <size_t NN, typename TT>
 			const static TT determinant(const matrix<NN, NN, TT>& m);
-
-			template <typename TT>
-			const static TT determinant(const matrix<2, 2, TT>& m);
 
 			// Static instantiator
 			template <typename TT = enable_if_square<T>>
@@ -146,7 +146,7 @@ namespace react
 		}
 
 		template <size_t M, size_t N, typename T>
-		const vector<N, T> matrix<M, N, T>::row(const size_t& row_index) const
+		const vector<M, T> matrix<M, N, T>::row(const size_t& row_index) const
 		{
 #ifndef _REACT_NO_SAFE_ACCESSORS
 			assert(M > row_index);
@@ -173,6 +173,28 @@ namespace react
 				tmp[i] = at(row_index, col_index);
 
 			return tmp;
+		}
+
+		template <size_t M, size_t N, typename T>
+		matrix<M, N, T>& matrix<M, N, T>::swap_row(const size_t& row1, const size_t& row2)
+		{
+			assert(row1 < M && row2 < M);
+
+			for (int i = 0; i < M; ++i)
+				std::swap(this->at(row1, i), this->at(row2, i));
+
+			return *this;
+		}
+
+		template <size_t M, size_t N, typename T>
+		matrix<M, N, T>& matrix<M, N, T>::swap_col(const size_t& col1, const size_t& col2)
+		{
+			assert(col1 < N && col2 < N);
+
+			for (int i = 0; i < N; ++i)
+				std::swap(this->at(i, col1), this->at(i, col2));
+
+			return *this;
 		}
 
 		template <size_t M, size_t N, typename T>
@@ -300,20 +322,46 @@ namespace react
 		}
 
 		template <size_t M, size_t N, typename T>
-		template <typename TT>
-		const static TT matrix<M, N, T>::determinant(const matrix<2, 2, TT>& m)
-		{
-			return m.at(0, 0) * m.at(1, 1) - m.at(1, 0) * m.at(0, 1);
-		}
-
-		template <size_t M, size_t N, typename T>
 		template <size_t NN, typename TT>
 		const static TT matrix<M, N, T>::determinant(const matrix<NN, NN, TT>& m)
 		{
-			TT det = 0;
+			matrix<NN, NN, TT> matrix = m;
 
-			for (int x = 0; x < NN; ++x)
-				det += (x % 2 == 0 ? 1 : -1) * m.at(0, x) * determinant(m.reduce(0, x));
+			TT det = static_cast<T>(1);
+
+			for (int i = 0; i < NN; ++i)
+			{
+				T pivotElement = matrix.at(i, i);
+				int pivotRow = i;
+
+				for (int row = i + 1; row < NN; ++row)
+				{
+					if (std::abs(matrix.at(row, i)) > std::abs(pivotElement))
+					{
+						pivotElement = matrix.at(row, i);
+						pivotRow = row;
+					}
+				}
+
+				if (pivotElement == static_cast<T>(0))
+					return static_cast<T>(0);
+				
+				if (pivotRow != i)
+				{
+					matrix.swap_row(i, pivotRow);
+					det = -det;
+				}
+
+				det *= pivotElement;
+
+				for (int row = i + 1; row < NN; ++row)
+				{
+					for (int col = i + 1; col < NN; ++col)
+					{
+						matrix.at(row, col) -= matrix.at(row, i) * matrix.at(i, col) / pivotElement;
+					}
+				}
+			}
 
 			return det;
 		}
