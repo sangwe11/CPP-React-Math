@@ -12,7 +12,10 @@ namespace react
 		// constructors
 		mat2() : matrix() {}
 		explicit mat2(const T& a) : matrix(a) {}
-		mat2(const matrix& m) : matrix(m) {}
+		explicit mat2(const T(&data)[4]) : matrix(data) {}
+
+		template <size_t M, size_t N, typename T>
+		mat2(const matrix<M, N, T>& m) : matrix(m) {}
 
 		static const mat2<T> IDENTITY;
 	};
