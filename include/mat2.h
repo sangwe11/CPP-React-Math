@@ -5,28 +5,27 @@
 
 namespace react
 {
-	template <typename T>
-	class mat2 : public support::matrix<2, 2, T>
-	{
-	public:
-		// constructors
-		mat2() : matrix() {}
-		explicit mat2(const T& a) : matrix(a) {}
-		explicit mat2(const T(&data)[4]) : matrix(data) {}
-
-		template <size_t M, size_t N, typename T>
-		mat2(const matrix<M, N, T>& m) : matrix(m) {}
-
-		static const mat2<T> IDENTITY;
-	};
-
-	template <typename T>
-	const mat2<T> mat2<T>::IDENTITY(mat2<T>::get_identity());
-
 #ifndef _REACT_NO_TYPEDEFS
+	template <typename T>
+	using mat2 = support::matrix<2, 2, T>;
+
+	typedef mat2<double> mat2d;
 	typedef mat2<float> mat2f;
 	typedef mat2<int> mat2i;
-	typedef mat2<double> mat2d;
+
+	template <typename T>
+	using mat2x3 = support::matrix<2, 3, T>;
+
+	typedef mat2x3<double> mat2x3d;
+	typedef mat2x3<float> mat2x3f;
+	typedef mat2x3<int> mat2x3i;
+
+	template <typename T>
+	using mat2x4 = support::matrix<2, 4, T>;
+
+	typedef mat2x4<double> mat2x4d;
+	typedef mat2x4<float> mat2x4f;
+	typedef mat2x4<int> mat2x4i;
 #endif
 }
 

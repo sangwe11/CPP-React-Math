@@ -17,6 +17,7 @@ namespace react
 		public:
 			static const size_t ROWS = M;
 			static const size_t COLS = N;
+			static const size_t DIAG = std::min(M, N);
 			using value_type = T;
 
 			template <typename TT>
@@ -40,12 +41,17 @@ namespace react
 
 			// Utility functions
 			template <typename TT = enable_if_square<T>>
-			const T determinant();
+			const T determinant() const;
+
+			template <size_t P>
+			const matrix<M, P, T> dot(const matrix<N, P, T>& m) const;
 
 			template <typename TT = enable_if_square<T>>
 			const matrix<M, N, T> inverse() const;
 
 			const bool invertible() const;
+
+			const matrix<M, N, T> cofactors() const;
 
 			template <typename TT = enable_if_reducible<T>>
 			const matrix<M - 1, N - 1, T> reduce(const size_t &ignore_row, const size_t &ignore_col) const;
@@ -70,6 +76,9 @@ namespace react
 			template <size_t NN, typename TT>
 			const static TT determinant(const matrix<NN, NN, TT>& m);
 
+			template <size_t MM, size_t NN, size_t P, typename TT>
+			const static matrix<MM, P, TT> dot(const matrix<MM, NN, TT>& a, const matrix<NN, P, TT>& b);
+
 			template <size_t NN, typename TT>
 			const static matrix<NN, NN, TT> inverse(const matrix<NN, NN, TT>& m);
 
@@ -79,7 +88,7 @@ namespace react
 			const static matrix<N, M, T> transpose(const matrix<M, N, T> &m);
 
 			// Static instantiator
-			template <typename TT = enable_if_square<T>>
+			//template <typename TT = enable_if_square<T>>
 			static const matrix<M, N, T> get_identity();
 
 			// Operators
@@ -98,6 +107,11 @@ namespace react
 			matrix<M, N, T> operator*(const T& c) const;
 			matrix<M, N, T> operator/(const T& c) const;
 
+			template <size_t P>
+			matrix<M, P, T> operator*(const matrix<N, P, T>& m) const;
+
+			vector<M, T> operator*(const vector<N, T>& v) const;
+
 			friend std::ostream& operator<<(std::ostream& out, const matrix<M, N, T>& m)
 			{
 				for (int row_index = 0; row_index < M; ++row_index)
@@ -114,6 +128,7 @@ namespace react
 			// General mat defaults
 			static const matrix<M, N, T> ZERO;
 			static const matrix<M, N, T> ONE;
+			static const matrix<M, N, T> IDENTITY;
 
 		public:
 			T m_data[M * N];
@@ -202,7 +217,7 @@ namespace react
 		matrix<M, N, T>& matrix<M, N, T>::swap_row(const size_t& row1, const size_t& row2)
 		{
 #ifndef _REACT_NO_SAFE_ACCESSORS
-			assert(row1 < M&& row2 < M);
+			assert(row1 < M && row2 < M);
 #endif	
 
 			for (int i = 0; i < M; ++i)
@@ -215,7 +230,7 @@ namespace react
 		matrix<M, N, T>& matrix<M, N, T>::swap_col(const size_t& col1, const size_t& col2)
 		{
 #ifndef _REACT_NO_SAFE_ACCESSORS
-			assert(col1 < N&& col2 < N);
+			assert(col1 < N && col2 < N);
 #endif	
 
 			for (int i = 0; i < N; ++i)
@@ -226,7 +241,7 @@ namespace react
 
 		template <size_t M, size_t N, typename T>
 		template <typename TT>
-		const T matrix<M, N, T>::determinant()
+		const T matrix<M, N, T>::determinant() const
 		{
 			matrix<N, M, T> matrix = *this;
 
@@ -239,7 +254,7 @@ namespace react
 
 				for (int row = i + 1; row < M; ++row)
 				{
-					if (std::abs(matrix.at(row, i)) > std::abs(pivotElement))
+					if (fabs(matrix.at(row, i)) > fabs(pivotElement))
 					{
 						pivotElement = matrix.at(row, i);
 						pivotRow = row;
@@ -255,57 +270,55 @@ namespace react
 					det = -det;
 				}
 
+				if (fabs(pivotElement) < std::numeric_limits<T>::epsilon() * static_cast<T>(this->DIAG))
+					return static_cast<T>(0);
+
 				det *= pivotElement;
 
 				for (int row = i + 1; row < M; ++row)
 				{
 					for (int col = i + 1; col < N; ++col)
 					{
-						matrix.at(row, col) -= matrix.at(row, i) * matrix.at(i, col) / pivotElement;
+						matrix.at(row, col) -= (matrix.at(row, i) / pivotElement) * matrix.at(i, col);
 					}
 				}
 			}
 
+			if (fabs(det) < std::numeric_limits<T>::epsilon() * static_cast<T>(this->DIAG))
+				return static_cast<T>(0);
+
 			return det;
+		}
+
+		template <size_t M, size_t N, typename T>
+		template <size_t P>
+		const matrix<M, P, T> matrix<M, N, T>::dot(const matrix<N, P, T>& m) const
+		{
+			matrix<M, P, T> tmp;
+
+			for (int i = 0; i < M; ++i)
+				for(int j = 0; j < P; ++j)
+					for(int k = 0; k < N; ++k)
+						tmp.at(i, j) += this->at(i, k) * m.at(k, j);
+
+			return tmp;
 		}
 
 		template <size_t M, size_t N, typename T>
 		template <typename TT>
 		const matrix<M, N, T> matrix<M, N, T>::inverse() const
 		{
-			assert(invertible());
+			if (!invertible())
+				return matrix<M, N, T>::ZERO;
 
-			matrix<M, N * 2, T> tmp(*this);
+			matrix<M, N, T> tmp = this->cofactors(); // co-factors
+			tmp = tmp.transpose(); // adjugate
 
-			// Set right half to identity
-			for (int i = 0; i < M; ++i)
-				tmp.at(i, N + i) = 1;
+			T det = this->determinant(); // determinant
 
-			for (int i = 0; i < M; ++i)
-			{
-				for (int j = 0; j < N; ++j)
-				{
-					if (i != j)
-					{
-						T ratio = tmp.at(j, i) / tmp.at(i, i);
+			tmp *= static_cast<T>(1) / det; // inverse
 
-						for (int k = 0; k < 2 * N; ++k)
-						{
-							tmp.at(j, k) = tmp.at(j, k) - ratio * tmp.at(i, k);
-						}
-					}
-				}
-			}
-
-			for (int i = 0; i < M; ++i)
-			{
-				for (int j = N; j < 2 * N; ++j)
-				{
-					tmp.at(i, j) = tmp.at(i, j) / tmp.at(i, i);
-				}
-			}
-
-			return tmp.sub_matrix<M, N, T>(0, N);
+			return tmp;
 		}
 
 		template <size_t M, size_t N, typename T>
@@ -314,11 +327,31 @@ namespace react
 			if (M != N)
 				return false;
 
-			for (int i = 0; i < M; ++i)
-				if (at(i, i) == 0)
-					return false;
+			if (fabs(determinant()) <= 0)
+				return false;
 
 			return true;
+		}
+
+		template <size_t M, size_t N, typename T>
+		const matrix<M, N, T> matrix<M, N, T>::cofactors() const
+		{
+			matrix<M, N, T> tmp = matrix<M, N, T>::ZERO;
+
+			const size_t negate = 1u;
+
+			for (int i = 0; i < M; ++i)
+			{
+				for (int j = 0; j < N; ++j)
+				{
+					if((i + j) & negate)
+						tmp.at(i, j) = -this->reduce(i, j).determinant();
+					else
+						tmp.at(i, j) = this->reduce(i, j).determinant();
+				}
+			}
+
+			return tmp;
 		}
 
 		template <size_t M, size_t N, typename T>
@@ -435,6 +468,13 @@ namespace react
 		}
 
 		template <size_t M, size_t N, typename T>
+		template <size_t MM, size_t NN, size_t P, typename TT>
+		const static matrix<MM, P, TT> matrix<M, N, T>::dot(const matrix<MM, NN, TT>& a, const matrix<NN, P, TT>& b)
+		{
+			return a.dot(b);
+		}
+
+		template <size_t M, size_t N, typename T>
 		template <size_t NN, typename TT>
 		const static matrix<NN, NN, TT> matrix<M, N, T>::inverse(const matrix<NN, NN, TT>& m)
 		{
@@ -461,12 +501,11 @@ namespace react
 		}
 
 		template <size_t M, size_t N, typename T>
-		template <typename TT>
 		const matrix<M, N, T> matrix<M, N, T>::get_identity()
 		{
 			matrix<M, N, T> tmp;
 
-			for (int i = 0; i < tmp.ROWS; ++i)
+			for (int i = 0; i < tmp.DIAG; ++i)
 				tmp.at(i, i) = 1;
 
 			return tmp;
@@ -505,6 +544,8 @@ namespace react
 		{
 			for (int i = 0; i < M * N; ++i)
 				++m_data[i];
+
+			return *this;
 		}
 
 		template <size_t M, size_t N, typename T>
@@ -512,6 +553,8 @@ namespace react
 		{
 			for (int i = 0; i < M * N; ++i)
 				--m_data[i];
+
+			return *this;
 		}
 
 		template <size_t M, size_t N, typename T>
@@ -519,6 +562,8 @@ namespace react
 		{
 			for (int i = 0; i < M * N; ++i)
 				m_data[i] *= c;
+
+			return *this;
 		}
 
 		template <size_t M, size_t N, typename T>
@@ -526,6 +571,8 @@ namespace react
 		{
 			for (int i = 0; i < M * N; ++i)
 				m_data[i] /= c;
+
+			return *this;
 		}
 
 		template <size_t M, size_t N, typename T>
@@ -551,10 +598,44 @@ namespace react
 		}
 
 		template <size_t M, size_t N, typename T>
+		template <size_t P>
+		matrix<M, P, T> matrix<M, N, T>::operator*(const matrix<N, P, T>& m) const
+		{
+			return this->dot(m);
+		}
+
+		template <size_t M, size_t N, typename T>
+		vector<M, T> matrix<M, N, T>::operator*(const vector<N, T>& v) const
+		{
+			vector<M, T> tmp;
+
+			for (int i = 0; i < M; ++i)
+				for (int j = 0; j < N; ++j)
+					tmp[i] += this->at(i, j) * v[j];
+
+			return tmp;
+		}
+
+		template <size_t M, size_t N, typename T>
+		vector<N, T> operator*(const vector<M, T>& v, const matrix<M, N, T>& m)
+		{
+			vector<N, T> tmp;
+
+			for (int i = 0; i < M; ++i)
+				for (int j = 0; j < N; ++j)
+					tmp[j] += m.at(i, j) * v[i];
+
+			return tmp;
+		}
+
+		template <size_t M, size_t N, typename T>
 		const matrix<M, N, T> matrix<M, N, T>::ZERO(0);
 
 		template <size_t M, size_t N, typename T>
 		const matrix<M, N, T> matrix<M, N, T>::ONE(1);
+
+		template <size_t M, size_t N, typename T>
+		const matrix<M, N, T>  matrix<M, N, T>::IDENTITY(matrix<M, N, T>::get_identity());
 	}
 }
 

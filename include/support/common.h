@@ -24,7 +24,7 @@ namespace react
 		template<typename T, size_t M, size_t N>
 		struct check_mat_dimension
 		{
-			static_assert(M >= 2 && N >= 2, "matrix dimension must be >= 2 x 2");
+			static_assert(M >= 1 && N >= 1, "matrix dimension must be >= 1 x 1");
 			using type = T;
 		};		
 	}
