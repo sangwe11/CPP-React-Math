@@ -34,7 +34,7 @@ namespace react
 			explicit matrix(const T(&data)[ROWS * COLS]);
 
 			template <size_t MM, size_t NN, typename TT>
-			matrix(const matrix<MM, NN, TT>& m);
+			explicit matrix(const matrix<MM, NN, TT>& m);
 
 			// Accessors
 			inline T& at(const size_t& row_index, const size_t& col_index);
@@ -101,8 +101,11 @@ namespace react
 			inline T& operator()(const size_t& row_index, const size_t& col_index);
 			inline const T& operator()(const size_t& row_index, const size_t& col_index) const;
 
-			const bool operator==(const matrix<M, N, T>& m) const;
-			const bool operator!=(const matrix<M, N, T>& m) const;
+			template <size_t MM, size_t NN, typename TT>
+			const bool operator==(const matrix<MM, NN, TT>& m) const;
+
+			template <size_t MM, size_t NN, typename TT>
+			const bool operator!=(const matrix<MM, NN, TT>& m) const;
 
 			matrix<M, N, T>& operator++();
 			matrix<M, N, T>& operator--();
@@ -259,6 +262,8 @@ namespace react
 		template <typename TT>
 		const T matrix<M, N, T>::determinant() const
 		{
+			static_assert(std::numeric_limits<T>::is_iec559, "'determinant' only accepts floating-point inputs");
+
 			matrix<N, M, T> matrix = *this;
 
 			T det = static_cast<T>(1);
@@ -324,6 +329,8 @@ namespace react
 		template <typename TT>
 		const matrix<M, N, T> matrix<M, N, T>::inverse() const
 		{
+			static_assert(std::numeric_limits<T>::is_iec559, "'inverse' only accepts floating-point inputs");
+
 			if (!invertible())
 				return matrix<M, N, T>::ZERO;
 
@@ -550,17 +557,25 @@ namespace react
 		}
 
 		template <size_t M, size_t N, typename T>
-		const bool matrix<M, N, T>::operator==(const matrix<M, N, T>& m) const
+		template <size_t MM, size_t NN, typename TT>
+		const bool matrix<M, N, T>::operator==(const matrix<MM, NN, TT>& m) const
 		{
+			if (typeid(T) != typeid(TT))
+				return false;
+
+			if (ROWS != m.ROWS || COLS != m.COLS)
+				return false;
+
 			for (int i = 0; i < ROWS * COLS; ++i)
-				if (m_data[i] != m.m_data[i])
+				if (m_data[i] - m.m_data[i] > std::numeric_limits<T>::epsilon() * static_cast<T>(this->DIAG))
 					return false;
 
 			return true;
 		}
 
 		template <size_t M, size_t N, typename T>
-		const bool matrix<M, N, T>::operator!=(const matrix<M, N, T>& m) const
+		template <size_t MM, size_t NN, typename TT>
+		const bool matrix<M, N, T>::operator!=(const matrix<MM, NN, TT>& m) const
 		{
 			return !(*this == m);
 		}
@@ -606,6 +621,8 @@ namespace react
 		{
 			for (int i = 0; i < ROWS * COLS; ++i)
 				m_data[i] += c;
+
+			return *this;
 		}
 
 		template <size_t M, size_t N, typename T>
@@ -613,6 +630,8 @@ namespace react
 		{
 			for (int i = 0; i < ROWS * COLS; ++i)
 				m_data[i] -= c;
+
+			return *this;
 		}
 
 		template <size_t M, size_t N, typename T>
@@ -620,8 +639,7 @@ namespace react
 		{
 			matrix<M, N, T> tmp(*this);
 
-			for (int i = 0; i < ROWS * COLS; ++i)
-				tmp.m_data[i] *= c;
+			tmp *= c;
 
 			return tmp;
 		}
@@ -631,8 +649,7 @@ namespace react
 		{
 			matrix<M, N, T> tmp(*this);
 
-			for (int i = 0; i < ROWS * COLS; ++i)
-				tmp.m_data[i] /= c;
+			tmp /= c;
 
 			return tmp;
 		}
@@ -642,8 +659,7 @@ namespace react
 		{
 			matrix<M, N, T> tmp(*this);
 
-			for (int i = 0; i < ROWS * COLS; ++i)
-				tmp.m_data[i] += c;
+			tmp += c;
 
 			return tmp;
 		}
@@ -653,8 +669,7 @@ namespace react
 		{
 			matrix<M, N, T> tmp(*this);
 
-			for (int i = 0; i < ROWS * COLS; ++i)
-				tmp.m_data[i] -= c;
+			tmp -= c;
 
 			return tmp;
 		}
@@ -739,6 +754,40 @@ namespace react
 			for (int i = 0; i < matrix<M, N, T>::ROWS; ++i)
 				for (int j = 0; j < matrix<M, N, T>::COLS; ++j)
 					tmp[j] += m.at(i, j) * v[i];
+
+			return tmp;
+		}
+
+		template <size_t M, size_t N, typename T>
+		matrix<M, N, T> operator*(const T& c, const matrix<M, N, T>& m)
+		{
+			return m * c;
+		}
+
+		template <size_t M, size_t N, typename T>
+		matrix<M, N, T> operator/(const T& c, const matrix<M, N, T>& m)
+		{
+			matrix<M, N, T> tmp(m);
+
+			for (int i = 0; i < m.ROWS * m.COLS; ++i)
+				tmp.m_data[i] = c / tmp.m_data[i];
+
+			return tmp;
+		}
+
+		template <size_t M, size_t N, typename T>
+		matrix<M, N, T> operator+(const T& c, const matrix<M, N, T>& m)
+		{
+			return m + c;
+		}
+
+		template <size_t M, size_t N, typename T>
+		matrix<M, N, T> operator-(const T& c, const matrix<M, N, T>& m)
+		{
+			matrix<M, N, T> tmp(m);
+
+			for (int i = 0; i < m.ROWS * m.COLS; ++i)
+				tmp.m_data[i] = c - tmp.m_data[i];
 
 			return tmp;
 		}
