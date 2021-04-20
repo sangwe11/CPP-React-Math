@@ -222,6 +222,21 @@ BOOST_AUTO_TEST_CASE(vector_length, *boost::unit_test::tolerance(tolerence))
 	BOOST_TEST(B.length() == B_truth);
 }
 
+BOOST_AUTO_TEST_CASE(vector_max_min)
+{
+	react::vec3f A(-10.0f, 1.0f, 3.0f);
+	react::vec3f B(2.0f, -4.0f, 3.0f);
+
+	react::vec3f C = react::vec3f::max(A, B);
+	react::vec3f D = react::vec3f::min(A, B);
+
+	react::vec3f C_truth(2.0f, 1.0f, 3.0f);
+	react::vec3f D_truth(-10.0f, -4.0f, 3.0f);
+
+	BOOST_TEST(C == C_truth);
+	BOOST_TEST(D == D_truth);
+}
+
 BOOST_AUTO_TEST_CASE(vector_normalize)
 {
 	react::vec3f A(5.0f, -1.0f, 3.0f);
@@ -274,6 +289,160 @@ BOOST_AUTO_TEST_CASE(vector_project)
 	react::vec3f D_truth(0.0f, 3.0f, 0.0f);
 	react::vec3f E_truth(7.0f, 0.0f, 0.0f);
 
+	BOOST_TEST(D == D_truth);
+	BOOST_TEST(E == E_truth);
+}
+
+BOOST_AUTO_TEST_CASE(vector_random)
+{
+	react::vec3f A = react::vec3f::random(0.0f, 1.0f);
+	react::vec3f B = react::vec3f::random(0.0f, 1.0f);
+
+	BOOST_TEST(A != B);
+}
+
+BOOST_AUTO_TEST_CASE(vector_constant_addition)
+{
+	react::vec3f A(1.0f, 2.0f, 3.0f);
+	react::vec3f B(9.0f, 8.0f, 7.0f);
+
+	B += 3.0f;
+	react::vec3f C = A + 2.0f;
+	react::vec3f D = 2.0f + A;
+
+	react::vec3f B_truth(12.0f, 11.0f, 10.0f);
+	react::vec3f C_truth(3.0f, 4.0f, 5.0f);
+	react::vec3f D_truth(3.0f, 4.0f, 5.0f);
+
+	BOOST_TEST(B == B_truth);
+	BOOST_TEST(C == C_truth);
+	BOOST_TEST(D == D_truth);
+}
+
+BOOST_AUTO_TEST_CASE(vector_constant_subtraction)
+{
+	react::vec3f A(1.0f, 2.0f, 3.0f);
+	react::vec3f B(9.0f, 8.0f, 7.0f);
+
+	B -= 3.0f;
+	react::vec3f C = A - 2.0f;
+	react::vec3f D = 2.0f - A;
+
+	react::vec3f B_truth(6.0f, 5.0f, 4.0f);
+	react::vec3f C_truth(-1.0f, 0.0f, 1.0f);
+	react::vec3f D_truth(1.0f, 0.0f, -1.0f);
+
+	BOOST_TEST(B == B_truth);
+	BOOST_TEST(C == C_truth);
+	BOOST_TEST(D == D_truth);
+}
+
+BOOST_AUTO_TEST_CASE(vector_constant_multiplication)
+{
+	react::vec3f A(1.0f, 2.0f, 3.0f);
+	react::vec3f B(9.0f, 8.0f, 7.0f);
+
+	B *= 2.0f;
+	react::vec3f C = A * -2.0f;
+	react::vec3f D = 3.0f * A;
+
+	react::vec3f B_truth(18.0f, 16.0f, 14.0f);
+	react::vec3f C_truth(-2.0f, -4.0f, -6.0f);
+	react::vec3f D_truth(3.0f, 6.0f, 9.0f);
+
+	BOOST_TEST(B == B_truth);
+	BOOST_TEST(C == C_truth);
+	BOOST_TEST(D == D_truth);
+}
+
+BOOST_AUTO_TEST_CASE(vector_constant_division)
+{
+	react::vec3f A(2.0f, 4.0f, 6.0f);
+	react::vec3f B(2.0f, 4.0f, 8.0f);
+	react::vec3f C(8.0f, 2.0f, 4.0f);
+
+	C /= 2.0f;
+	react::vec3f D = A / -2.0f;
+	react::vec3f E = 1.0f / B;
+
+	react::vec3f C_truth(8.0f / 2.0f, 2.0f / 2.0f, 4.0f / 2.0f);
+	react::vec3f D_truth(2.0f / -2.0f, 4.0f / -2.0f, 6.0f / -2.0f);
+	react::vec3f E_truth(1.0 / 2.0f, 1.0f / 4.0f, 1.0f / 8.0f);
+
+	BOOST_TEST(C == C_truth);
+	BOOST_TEST(D == D_truth);
+	BOOST_TEST(E == E_truth);
+}
+
+BOOST_AUTO_TEST_CASE(vector_addition)
+{
+	react::vec3f A(1.0f, 2.0f, 3.0f);
+	react::vec3f B(8.0f, 5.0f, 2.0f);
+	react::vec3f C(4.0f, 5.0f, 6.0f);
+
+	C += A;
+	react::vec3f D = A + B;
+
+	react::vec3f C_truth(5.0f, 7.0f, 9.0f);
+	react::vec3f D_truth(9.0f, 7.0f, 5.0f);
+
+	BOOST_TEST(C == C_truth);
+	BOOST_TEST(D == D_truth);
+}
+
+BOOST_AUTO_TEST_CASE(vector_subtraction)
+{
+	react::vec3f A(3.0f, -1.0f, 2.0f);
+	react::vec3f B(8.0f, 5.0f, 2.0f);
+	react::vec3f C(4.0f, 5.0f, 6.0f);
+
+	C -= A;
+	react::vec3f D = A - B;
+	react::vec3f E = B - A;
+
+	react::vec3f C_truth(1.0f, 6.0f, 4.0f);
+	react::vec3f D_truth(-5.0f, -6.0f, 0.0f);
+	react::vec3f E_truth(5.0f, 6.0f, 0.0f);
+
+	BOOST_TEST(C == C_truth);
+	BOOST_TEST(D == D_truth);
+	BOOST_TEST(E == E_truth);
+}
+
+BOOST_AUTO_TEST_CASE(vector_multiplication)
+{
+	react::vec3f A(1.0f, 2.0f, 3.0f);
+	react::vec3f B(9.0f, 8.0f, 7.0f);
+	react::vec3f C(4.0f, 2.0f, 9.0f);
+
+	C *= A;
+	react::vec3f D = A * B;
+	react::vec3f E = B * A;
+
+	react::vec3f C_truth(4.0f, 4.0f, 27.0f);
+	react::vec3f D_truth(9.0f, 16.0f, 21.0f);
+	react::vec3f E_truth(9.0f, 16.0f, 21.0f);
+
+	BOOST_TEST(C == C_truth);
+	BOOST_TEST(D == D_truth);
+	BOOST_TEST(E == E_truth);
+}
+
+BOOST_AUTO_TEST_CASE(vector_division)
+{
+	react::vec3f A(1.0f, 2.0f, 3.0f);
+	react::vec3f B(3.0f, 2.0f, 1.0f);
+	react::vec3f C(2.0f, 3.0f, 5.0f);
+
+	C /= A;
+	react::vec3f D = A / B;
+	react::vec3f E = B / A;
+
+	react::vec3f C_truth(2.0f / 1.0f, 3.0f / 2.0f, 5.0f / 3.0f);
+	react::vec3f D_truth(1.0f / 3.0f, 2.0f / 2.0f, 3.0f / 1.0f);
+	react::vec3f E_truth(3.0f / 1.0f, 2.0f / 2.0f, 1.0f / 3.0f);
+
+	BOOST_TEST(C == C_truth);
 	BOOST_TEST(D == D_truth);
 	BOOST_TEST(E == E_truth);
 }

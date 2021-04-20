@@ -135,6 +135,8 @@ namespace react
 
 			vector<S, T>& operator*=(const T& c);
 			vector<S, T>& operator/=(const T& c);
+			vector<S, T>& operator+=(const T& c);
+			vector<S, T>& operator-=(const T& c);
 
 			vector<S, T> operator+(const vector<S, T>& v) const;
 			vector<S, T> operator-(const vector<S, T>& v) const;
@@ -143,6 +145,8 @@ namespace react
 
 			vector<S, T> operator*(const T& c) const;
 			vector<S, T> operator/(const T& c) const;
+			vector<S, T> operator+(const T& c) const;
+			vector<S, T> operator-(const T& c) const;
 
 			friend std::ostream& operator<<(std::ostream& out, const vector<S, T>& v)
 			{
@@ -417,26 +421,52 @@ namespace react
 		}
 
 		template <size_t S, typename T>
+		vector<S, T>& vector<S, T>::operator+=(const T& c)
+		{
+			for (int i = 0; i < this->DIMENSION; ++i)
+				m_data[i] += c;
+
+			return *this;
+		}
+
+		template <size_t S, typename T>
+		vector<S, T>& vector<S, T>::operator-=(const T& c)
+		{
+			for (int i = 0; i < this->DIMENSION; ++i)
+				m_data[i] -= c;
+
+			return *this;
+		}
+
+		template <size_t S, typename T>
 		vector<S, T> vector<S, T>::operator+(const vector<S, T>& v) const
 		{
-			vector<S, T> tmp = v;
-			tmp += *this;
+			vector<S, T> tmp = *this;
+			tmp += v;
 			return tmp;
 		}
 
 		template <size_t S, typename T>
 		vector<S, T> vector<S, T>::operator-(const vector<S, T>& v) const
 		{
-			vector<S, T> tmp = v;
-			tmp -= *this;
+			vector<S, T> tmp = *this;
+			tmp -= v;
 			return tmp;
 		}
 
 		template <size_t S, typename T>
 		vector<S, T> vector<S, T>::operator*(const vector<S, T>& v) const
 		{
-			vector<S, T> tmp = v;
-			tmp *= *this;
+			vector<S, T> tmp = *this;
+			tmp *= v;
+			return tmp;
+		}
+
+		template <size_t S, typename T>
+		vector<S, T> vector<S, T>::operator/(const vector<S, T>& v) const
+		{
+			vector<S, T> tmp = *this;
+			tmp /= v;
 			return tmp;
 		}
 
@@ -447,10 +477,35 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		vector<S, T> vector<S, T>::operator/(const vector<S, T>& v) const
+		inline vector<S, T> operator/(const T& c, const vector<S, T>& v)
 		{
-			vector<S, T> tmp = v;
-			tmp /= *this;
+			vector<S, T> tmp;
+
+			for (int i = 0; i < v.DIMENSION; ++i)
+				tmp[i] = c / v[i];
+
+			return tmp;
+		}
+
+		template <size_t S, typename T>
+		inline vector<S, T> operator+(const T& c, const vector<S, T>& v)
+		{
+			vector<S, T> tmp;
+
+			for (int i = 0; i < v.DIMENSION; ++i)
+				tmp[i] = c + v[i];
+
+			return tmp;
+		}
+
+		template <size_t S, typename T>
+		inline vector<S, T> operator-(const T& c, const vector<S, T>& v)
+		{
+			vector<S, T> tmp;
+
+			for (int i = 0; i < v.DIMENSION; ++i)
+				tmp[i] = c - v[i];
+
 			return tmp;
 		}
 
@@ -467,6 +522,22 @@ namespace react
 		{
 			vector<S, T> tmp = *this;
 			tmp /= c;
+			return tmp;
+		}
+
+		template <size_t S, typename T>
+		vector<S, T> vector<S, T>::operator+(const T& c) const
+		{
+			vector<S, T> tmp = *this;
+			tmp += c;
+			return tmp;
+		}
+
+		template <size_t S, typename T>
+		vector<S, T> vector<S, T>::operator-(const T& c) const
+		{
+			vector<S, T> tmp = *this;
+			tmp -= c;
 			return tmp;
 		}
 
