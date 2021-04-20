@@ -10,6 +10,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 add_executable(test_unit
 	tests_main.cpp
 	matrix.cpp
+	vector.cpp
 )
 
 target_link_libraries(test_unit CPP-React-Math)
