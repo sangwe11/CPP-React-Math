@@ -90,7 +90,7 @@ namespace react
 			const static matrix<NN, NN, TT> inverse(const matrix<NN, NN, TT>& m);
 
 			template <size_t MM, size_t NN, typename TT>
-			const static matrix<MM, NN, TT> outer_product(const vector<MM, TT>& c, const vector<NN, TT>& r);
+			const static matrix<NN, MM, TT> outer_product(const vector<MM, TT>& c, const vector<NN, TT>& r);
 
 			const static matrix<N, M, T> transpose(const matrix<M, N, T> &m);
 
@@ -516,9 +516,9 @@ namespace react
 
 		template <size_t M, size_t N, typename T>
 		template <size_t MM, size_t NN, typename TT>
-		const static matrix<MM, NN, TT> matrix<M, N, T>::outer_product(const vector<MM, TT>& c, const vector<NN, TT>& r)
+		const static matrix<NN, MM, TT> matrix<M, N, T>::outer_product(const vector<MM, TT>& c, const vector<NN, TT>& r)
 		{
-			matrix<MM, NN, TT> tmp;
+			matrix<NN, MM, TT> tmp;
 
 			for (int row = 0; row < tmp.ROWS; ++row)
 				for (int col = 0; col < tmp.COLS; ++col)
