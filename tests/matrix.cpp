@@ -486,4 +486,163 @@ BOOST_AUTO_TEST_CASE(matrix_constant_subtraction)
 	BOOST_TEST(C == const_min_A_truth);
 }
 
+BOOST_AUTO_TEST_CASE(matrix_at)
+{
+	react::mat3f A({ 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f });
+	// 1  4  7
+	// 2  5  8
+	// 3  6  9
+
+	float B = A.at(0, 1); // row 0, col 1
+	float C = A.at(2, 0); // row 2, col 0
+	float D = A.at(2, 2); // row 2, col 2
+
+	float B_truth = 4.0f;
+	float C_truth = 3.0f;
+	float D_truth = 9.0f;
+
+	BOOST_TEST(B == B_truth);
+	BOOST_TEST(C == C_truth);
+	BOOST_TEST(D == D_truth);
+}
+
+BOOST_AUTO_TEST_CASE(matrix_row)
+{
+	react::mat3f A({ 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f });
+	// 1  4  7
+	// 2  5  8
+	// 3  6  9
+
+	react::mat3f::row_type B = A.row(0);
+	// 1  4  7
+
+	react::mat3f::row_type C = A.row(2);
+	// 3  6  9
+
+	float B_truth[] = { 1.0f, 4.0f, 7.0f };
+	// 1  4  7
+
+	float C_truth[] = { 3.0f, 6.0f, 9.0f };
+	// 3  6  9
+
+	BOOST_CHECK_EQUAL_COLLECTIONS(B.m_data, B.m_data + 3, B_truth, B_truth + 3);
+	BOOST_CHECK_EQUAL_COLLECTIONS(C.m_data, C.m_data + 3, C_truth, C_truth + 3);
+}
+
+BOOST_AUTO_TEST_CASE(matrix_col)
+{
+	react::mat3f A({ 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f });
+	// 1  4  7
+	// 2  5  8
+	// 3  6  9
+
+	react::mat3f::col_type B = A.col(0);
+	// 1  2  3
+
+	react::mat3f::col_type C = A.col(2);
+	// 7  8  9
+
+	float B_truth[] = { 1.0f, 2.0f, 3.0f };
+	// 1  2  3
+
+	float C_truth[] = { 7.0f, 8.0f, 9.0f };
+	// 7  8  9
+
+	BOOST_CHECK_EQUAL_COLLECTIONS(B.m_data, B.m_data + 3, B_truth, B_truth + 3);
+	BOOST_CHECK_EQUAL_COLLECTIONS(C.m_data, C.m_data + 3, C_truth, C_truth + 3);
+}
+
+BOOST_AUTO_TEST_CASE(matrix_invertible)
+{
+	react::mat3f A({ 1.0f, -2.0f, 1.0f, 2.0f, 0.0f, -1.0f, -1.0f, 1.0f, 0.0f });
+	//  1   2  -1
+	// -2   0   1
+	//  1  -1   0
+
+	react::mat4f B({ 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 15.0f, 16.0f });
+	// 1  5  9   13
+	// 2  6  10  14
+	// 3  7  11  15
+	// 4  8  12  16
+
+	BOOST_TEST(A.invertible() == true);
+	BOOST_TEST(B.invertible() == false);
+}
+
+BOOST_AUTO_TEST_CASE(matrix_outer_product)
+{
+	react::vec3f A({ 3.0f, 2.0f, 1.0f });
+	// 3  2  1
+
+	react::vec4f B({ 7.0f, 2.0f, 3.0f, 1.0f });
+	// 7  2  3  1
+
+	auto C = react::mat3f::outer_product(A, B);
+
+	react::mat4x3f truth({ 21.0f, 14.0f, 7.0f, 6.0f, 4.0f, 2.0f, 9.0f, 6.0f, 3.0f, 3.0f, 2.0f, 1.0f });
+	// 21  6  9  3
+	// 14  4  6  2
+	//  7  2  3  1
+
+	BOOST_TEST(C == truth);
+}
+
+BOOST_AUTO_TEST_CASE(matrix_set_row)
+{
+	react::mat3f A = react::mat3f::ONE;
+	// 1  1  1
+	// 1  1  1
+	// 1  1  1
+
+	react::mat3f B = react::mat3f::ZERO;
+	// 0  0  0
+	// 0  0  0
+	// 0  0  0
+
+	A.set_row({ 9.0f, 8.0f, 7.0f }, 1);
+	B.set_row(react::vec3f(1.0f, 2.0f, 3.0f), 2);
+
+	react::mat3f A_truth({ 1.0f, 9.0f, 1.0f, 1.0f, 8.0f, 1.0f, 1.0f, 7.0f, 1.0f });
+	// 1  1  1
+	// 9  8  7
+	// 1  1  1
+
+	react::mat3f B_truth({ 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 2.0f, 0.0f, 0.0f, 3.0f });
+	// 0  0  0
+	// 0  0  0
+	// 1  2  3
+
+	BOOST_TEST(A == A_truth);
+	BOOST_TEST(B == B_truth);
+}
+
+BOOST_AUTO_TEST_CASE(matrix_set_col)
+{
+	react::mat3f A = react::mat3f::ONE;
+	// 1  1  1
+	// 1  1  1
+	// 1  1  1
+
+	react::mat3f B = react::mat3f::ZERO;
+	// 0  0  0
+	// 0  0  0
+	// 0  0  0
+
+	A.set_col({ 9.0f, 8.0f, 7.0f }, 1);
+	B.set_col(react::vec3f(1.0f, 2.0f, 3.0f), 2);
+
+	react::mat3f A_truth({ 1.0f, 1.0f, 1.0f, 9.0f, 8.0f, 7.0f, 1.0f, 1.0f, 1.0f });
+	// 1  9  1
+	// 1  8  1
+	// 1  7  1
+
+	react::mat3f B_truth({ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 2.0f, 3.0f });
+	// 0  0  1
+	// 0  0  2
+	// 0  0  3
+
+	BOOST_TEST(A == A_truth);
+	BOOST_TEST(B == B_truth);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
