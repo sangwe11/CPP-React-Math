@@ -15,6 +15,9 @@ namespace react
 		vec4(const vector& v) : vector(v) {}
 		vec4(const T& x, const T& y, const T& z);
 		vec4(const T& x, const T& y, const T& z, const T& w);
+
+		template <size_t SS, typename TT>
+		vec4(const vector<SS, TT>& v) : vector(v) {}
 	};
 
 	template <typename T>

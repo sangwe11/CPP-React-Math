@@ -12,8 +12,10 @@ namespace react
 		// constructors
 		vec2() : vector<2, T>() {}
 		explicit vec2(const T& a) : vector(a) {}
-		vec2(const vector& v) : vector(v) {}
 		vec2(const T& x, const T& y);
+
+		template <size_t SS, typename TT>
+		vec2(const vector<SS, TT>& v) : vector(v) {}
 
 		static const vec2<T> UP;
 		static const vec2<T> DOWN;
@@ -29,16 +31,16 @@ namespace react
 	}
 
 	template <typename T>
-	const vec2<T> vec2<T>::UP(0, 1, 0);
+	const vec2<T> vec2<T>::UP(0, 1);
 
 	template <typename T>
-	const vec2<T> vec2<T>::DOWN(0, -1, 0);
+	const vec2<T> vec2<T>::DOWN(0, -1);
 
 	template <typename T>
-	const vec2<T> vec2<T>::LEFT(-1, 0, 0);
+	const vec2<T> vec2<T>::LEFT(-1, 0);
 
 	template <typename T>
-	const vec2<T> vec2<T>::RIGHT(1, 0, 0);
+	const vec2<T> vec2<T>::RIGHT(1, 0);
 
 #ifndef _REACT_NO_TYPEDEFS
 	typedef vec2<float> vec2f;
