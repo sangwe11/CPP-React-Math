@@ -566,11 +566,15 @@ namespace react
 			if (ROWS != m.ROWS || COLS != m.COLS)
 				return false;
 
+#ifndef _REACT_EXACT_COMPARISON
 			for (int i = 0; i < ROWS * COLS; ++i)
-				if (m_data[i] - m.m_data[i] > std::numeric_limits<T>::epsilon() * static_cast<T>(this->DIAG))
+				if (fabs(m_data[i] - m.m_data[i]) > std::numeric_limits<T>::epsilon())
 					return false;
 
 			return true;
+#else
+			return std::memcmp(m_data, m.m_data, sizeof(m_data)) == 0;
+#endif
 		}
 
 		template <size_t M, size_t N, typename T>
