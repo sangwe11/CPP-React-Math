@@ -14,6 +14,13 @@ namespace react
 			using type = T;
 		};
 
+		template<typename T>
+		struct check_type_floating
+		{
+			static_assert(std::numeric_limits<T>::is_iec559, "'check_type_floating' only accepts floating-point types");
+			using type = T;
+		};
+
 		template<typename T, size_t S>
 		struct check_vec_dimension
 		{

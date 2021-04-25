@@ -9,4 +9,6 @@
 #include "mat3.h"
 #include "mat4.h"
 
+#include "quat.h"
+
 #endif
