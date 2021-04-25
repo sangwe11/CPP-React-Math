@@ -21,8 +21,6 @@ namespace react
 		using super::w;
 		using super::length;
 		using super::length_squared;
-		using super::normalize;
-		using super::normalized;
 		using super::operator[];
 		using super::m_data;
 
@@ -36,7 +34,10 @@ namespace react
 		const quat<T> conjugate() const;
 		const T dot(const quat<T>& b) const;
 		const quat<T> inverse() const;
+		const quat<T> normalized() const;
 		const vec3<T> rotate(const vec3<T> v) const;
+
+		quat<T>& normalize();
 
 		const static quat<T> axisAngle(const vec3<T>& axis, const T& angle);
 		const static T dot(const quat<T>& a, const quat<T>& b);
@@ -126,9 +127,21 @@ namespace react
 	}
 
 	template <typename T>
+	const quat<T> quat<T>::normalized() const
+	{
+		return normalized(*this);
+	}
+
+	template <typename T>
 	const vec3<T> quat<T>::rotate(const vec3<T> v) const
 	{
 		return rotate(*this, v);
+	}
+
+	template <typename T>
+	quat<T>& quat<T>::normalize()
+	{
+		return *this *= (static_cast<T>(1) / length());
 	}
 
 	template <typename T>
@@ -173,7 +186,7 @@ namespace react
 	template <typename T>
 	const quat<T> quat<T>::normalized(const quat<T>& a)
 	{
-		return a.normalized();
+		return a * (static_cast<T>(1) / a.length());
 	}
 
 	template <typename T>
@@ -224,6 +237,12 @@ namespace react
 		quat<T> tmp = *this;
 		tmp *= c;
 		return tmp;
+	}
+
+	template <typename T>
+	inline quat<T> operator*(const T& c, const quat<T>& q)
+	{
+		return q * c;
 	}
 
 	template <typename T>
