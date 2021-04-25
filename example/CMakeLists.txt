@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.1.0)
+cmake_minimum_required(VERSION 3.13.0)
 project(CPP-React-Math-Example)
 
-add_executable(demo main.cpp)
+add_executable(example main.cpp)
 
-target_link_libraries(demo CPP-React-Math)
+target_link_libraries(example CPP-React-Math)
