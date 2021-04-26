@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(quat_normalized)
 BOOST_AUTO_TEST_CASE(quat_rotate_vec3)
 {
 	react::vec3f A(1.0f, 0.0f, -1.0f);
-	react::quatf B = react::quatf::axisAngle(react::vec3f::UP, 90.0f);
+	react::quatf B = react::quatf::fromAxisAngle(react::vec3f::UP, 90.0f);
 
 	react::vec3f C = B.rotate(A);
 
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(quat_rotate_vec3)
 
 BOOST_AUTO_TEST_CASE(quat_axis_angle)
 {
-	react::quatf C = react::quatf::axisAngle(react::vec3f::UP, 90.0f);
+	react::quatf C = react::quatf::fromAxisAngle(react::vec3f::UP, 90.0f);
 
 	react::quatf truth(0.0f, 0.8509035110473633f, 0.0f, 0.5253219604492188f);
 
