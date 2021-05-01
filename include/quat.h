@@ -26,10 +26,11 @@ namespace react
 
 		quat() { w() = 1; }
 		quat(const T& x, const T& y, const T& z, const T& w);
-		quat(const vec3<T>& xyz, const T& w);
 		quat(const vec4<T>& xyzw);
-		quat(const mat3<T>& m);
+
+		quat(const vec3<T>& axis, const T& angle);
 		quat(const vec3<T>& eulers);
+		quat(const mat3<T>& m);
 
 		inline const vec3<T> xyz() const;
 
@@ -99,15 +100,6 @@ namespace react
 	}
 
 	template <typename T>
-	quat<T>::quat(const vec3<T>& xyz, const T& w)
-	{
-		m_data[0] = xyz[0];
-		m_data[1] = xyz[1];
-		m_data[2] = xyz[2];
-		m_data[3] = w;
-	}
-
-	template <typename T>
 	quat<T>::quat(const vec4<T>& xyzw)
 	{
 		m_data[0] = xyzw[0];
@@ -116,6 +108,37 @@ namespace react
 		m_data[3] = xyzw[3];
 	}
 
+	template <typename T>
+	quat<T>::quat(const vec3<T>& axis, const T& angle)
+	{
+		vec3<T> ax = axis.normalized();
+
+		T s = sin(angle / static_cast<T>(2));
+
+		this->x() = ax.x() * s;
+		this->y() = ax.y() * s;
+		this->z() = ax.z() * s;
+		this->w() = cos(angle / static_cast<T>(2));
+	}
+
+	template <typename T>
+	quat<T>::quat(const vec3<T>& eulers)
+	{
+		T cos_x = cos(eulers.x() / static_cast<T>(2));
+		T sin_x = sin(eulers.x() / static_cast<T>(2));
+		T cos_y = cos(eulers.y() / static_cast<T>(2));
+		T sin_y = sin(eulers.y() / static_cast<T>(2));
+		T cos_z = cos(eulers.z() / static_cast<T>(2));
+		T sin_z = sin(eulers.z() / static_cast<T>(2));
+		
+		// zyx order
+		x() = sin_x * cos_y * cos_z - cos_x * sin_y * sin_z;
+		y() = cos_x * sin_y * cos_z + sin_x * cos_y * sin_z;
+		z() = cos_x * cos_y * sin_z - sin_x * sin_y * cos_z;
+		w() = cos_x * cos_y * cos_z + sin_x * sin_y * sin_z;
+	}
+
+	// credit https://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
 	template <typename T>
 	quat<T>::quat(const mat3<T>& m)
 	{
@@ -143,10 +166,10 @@ namespace react
 			{
 				T s = static_cast<T>(2) * sqrt(static_cast<T>(1) + m(1, 1) - m(0, 0) - m(2, 2));
 
-				x() = (m(0,1) + m(1, 0)) / s;
+				x() = (m(0, 1) + m(1, 0)) / s;
 				y() = s / static_cast<T>(4);
-				z() = (m(1,2) + m(2, 1)) / s;
-				w() = (m(0,2) + m(2, 0)) / s;
+				z() = (m(1, 2) + m(2, 1)) / s;
+				w() = (m(0, 2) + m(2, 0)) / s;
 			}
 			else
 			{
@@ -158,25 +181,6 @@ namespace react
 				w() = (m(1, 0) - m(0, 1)) / s;
 			}
 		}
-	}
-
-	template <typename T>
-	quat<T>::quat(const vec3<T>& eulers)
-	{
-		T cos_x = cos(eulers.x() / static_cast<T>(2));
-		T sin_x = sin(eulers.x() / static_cast<T>(2));
-		T cos_y = cos(eulers.y() / static_cast<T>(2));
-		T sin_y = sin(eulers.y() / static_cast<T>(2));
-		T cos_z = cos(eulers.z() / static_cast<T>(2));
-		T sin_z = sin(eulers.z() / static_cast<T>(2));
-
-		T cos_y_cos_z = cos_y * cos_z;
-		T sin_y_sin_z = sin_y * sin_z;
-
-		x() = cos_y_cos_z * sin_x + sin_y_sin_z * cos_x;
-		y() = sin_y * cos_z * cos_x + cos_y * sin_z * sin_x;
-		z() = cos_y * sin_z * cos_x - sin_y * cos_z * sin_x;
-		w() = cos_y_cos_z * cos_x - sin_y_sin_z * sin_x;
 	}
 
 	template <typename T>
@@ -273,9 +277,7 @@ namespace react
 	template <typename T>
 	const quat<T> quat<T>::fromAxisAngle(const vec3<T>& axis, const T& angle)
 	{
-		T s = sin(angle * static_cast<T>(0.5));
-
-		return quat<T>(axis * s, cos(angle * static_cast<T>(0.5)));
+		return quat<T>(axis, angle);
 	}
 
 	template <typename T>
@@ -303,6 +305,8 @@ namespace react
 			axis_out.y() = q.y() / s;
 			axis_out.z() = q.z() / s;
 		}
+
+		axis_out.normalize();
 	}
 
 	template <typename T>
@@ -311,40 +315,24 @@ namespace react
 		return quat<T>(e);
 	}
 
+	// credit https://marc-b-reynolds.github.io/math/2017/04/18/TaitEuler.html
 	template <typename T>
 	const vec3<T> quat<T>::toEulers(const quat<T>& q)
 	{
-		vec3<T> tmp;
+		react::vec3f tmp;
 
-		T sqx = q.x() * q.x();
-		T sqy = q.y() * q.y();
-		T sqz = q.z() * q.z();
-		T sqw = q.w() * q.w();
+		// zyx order
+		T t0 = q.x() * q.x() - q.z() * q.z();
+		T t1 = q.w() * q.w() - q.y() * q.y();
+		T xx = (t0 + t1) / static_cast<T>(2);
+		T xy = q.x() * q.y() + q.w() * q.z();
+		T xz = q.w() * q.y() - q.x() * q.z();
+		T t = xx * xx + xy * xy;
+		T yz = static_cast<T>(2) * (q.y() * q.z() + q.w() * q.x());
 
-		T unit = sqx + sqy + sqz + sqw;
-		T test = q.x() * q.y() + q.z() * q.w();
-
-		if (test > 0.499 * unit)
-		{ // singularity at north pole
-			tmp.x() = static_cast<T>(0);
-			tmp.y() = static_cast<T>(2) * atan2(q.x(), q.w());
-			tmp.z() = react::math::half_pi<T>();
-
-			return tmp;
-		}
-
-		if (test < -0.499 * unit)
-		{ // singularity at south pole
-			tmp.x() = static_cast<T>(0);
-			tmp.y() = static_cast<T>(-2) * atan2(q.x(), q.w());
-			tmp.z() = -react::math::half_pi<T>();
-
-			return tmp;
-		}
-
-		tmp.x() = atan2(static_cast<T>(2) * q.x() * q.w() - static_cast<T>(2) * q.y() * q.z(), -sqx + sqy - sqz + sqw);
-		tmp.y() = atan2(static_cast<T>(2) * q.y() * q.w() - static_cast<T>(2) * q.x() * q.z(), sqx - sqy - sqz + sqw);
-		tmp.z() = asin(static_cast<T>(2) * test / unit);
+		tmp.z() = atan2(xy, xx);
+		tmp.y() = atan(xz / sqrt(t));
+		tmp.x() = (t != 0 ? atan2(yz, t1 - t0) : static_cast<T>(2) * atan2(q.x(), q.w()) - (xz > static_cast<T>(0) ? -1 : 1) * tmp.z());
 
 		return tmp;
 	}
@@ -396,7 +384,7 @@ namespace react
 	const bool quat<T>::operator==(const quat<T>& b) const
 	{
 #ifndef _REACT_EXACT_COMPARISON
-		for (int i = 0; i < DIMENSION; ++i)
+		for (int i = 0; i < this->DIMENSION; ++i)
 			if (fabs(m_data[i] - b.m_data[i]) > std::numeric_limits<T>::epsilon())
 				return false;
 
