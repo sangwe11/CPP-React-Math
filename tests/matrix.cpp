@@ -11,10 +11,10 @@ BOOST_AUTO_TEST_CASE(matrix_default_constructor)
 	// 0  0  0
 	// 0  0  0
 
-	float truth[] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-	// 0  0  0
-	// 0  0  0
-	// 0  0  0 
+	float truth[] = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
+	// 1  0  0
+	// 0  1  0
+	// 0  0  1 
 
 	BOOST_CHECK_EQUAL_COLLECTIONS(mat.m_data, mat.m_data + 9, truth, truth + 9);
 }
@@ -91,20 +91,20 @@ BOOST_AUTO_TEST_CASE(matrix_from_matrix_constructor)
 	// 0  1
 
 	react::mat4f C(A);
-	// 1  0  0  0
-	// 0  1  0  0
-	// 0  0  1  0
-	// 0  0  0  0
+	// 1  0  0  X
+	// 0  1  0  X
+	// 0  0  1  X
+	// X  X  X  X
 
 	float B_truth[] = { 1.0f, 0.0f, 0.0f, 1.0f };
 	// 1  0
 	// 0  1
 
-	float C_truth[] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+	float C_truth[] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
 	// 1  0  0  0
 	// 0  1  0  0
 	// 0  0  1  0
-	// 0  0  0  0
+	// 0  0  0  1
 
 	BOOST_CHECK_EQUAL_COLLECTIONS(B.m_data, B.m_data + 4, B_truth, B_truth + 4);
 	BOOST_CHECK_EQUAL_COLLECTIONS(C.m_data, C.m_data + 16, C_truth, C_truth + 16);

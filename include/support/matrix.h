@@ -12,7 +12,7 @@ namespace react
 		{
 		private:
 			typename check_mat_dimension<T, M, N>::type cd{};
-			typename check_type<T>::type ct{};
+			typename check_type_arithmetic<T>::type ct{};
 
 		public:
 			static const size_t ROWS = N;
@@ -94,9 +94,6 @@ namespace react
 
 			const static matrix<N, M, T> transpose(const matrix<M, N, T> &m);
 
-			// Static instantiator
-			static const matrix<M, N, T> get_identity();
-
 			// Operators
 			inline T& operator()(const size_t& row_index, const size_t& col_index);
 			inline const T& operator()(const size_t& row_index, const size_t& col_index) const;
@@ -138,7 +135,8 @@ namespace react
 					for (int col_index = 0; col_index < m.COLS; ++col_index)
 						out << m(row_index, col_index) << ' ';
 
-					out << '\n';
+					if(row_index != m.ROWS - 1)
+						out << '\n';
 				}
 
 				return out;
@@ -156,6 +154,8 @@ namespace react
 		template <size_t M, size_t N, typename T>
 		matrix<M, N, T>::matrix() : m_data()
 		{
+			for (int i = 0; i < DIAG; ++i)
+				this->at(i, i) = static_cast<T>(1);
 		}
 
 		template <size_t M, size_t N, typename T>
@@ -176,6 +176,9 @@ namespace react
 		template <size_t MM, size_t NN, typename TT>
 		matrix<M, N, T>::matrix(const matrix<MM, NN, TT>& m) : m_data()
 		{
+			for (int i = 0; i < DIAG; ++i)
+				this->at(i, i) = static_cast<T>(1);
+
 			size_t min_ROWS = std::min(ROWS, m.ROWS);
 			size_t min_COLS = std::min(COLS, m.COLS);
 			
@@ -534,17 +537,6 @@ namespace react
 		}
 
 		template <size_t M, size_t N, typename T>
-		const matrix<M, N, T> matrix<M, N, T>::get_identity()
-		{
-			matrix<M, N, T> tmp;
-
-			for (int i = 0; i < tmp.DIAG; ++i)
-				tmp.at(i, i) = 1;
-
-			return tmp;
-		}
-
-		template <size_t M, size_t N, typename T>
 		inline T& matrix<M, N, T>::operator()(const size_t& row_index, const size_t& col_index)
 		{
 			return at(row_index, col_index);
@@ -803,7 +795,7 @@ namespace react
 		const matrix<M, N, T> matrix<M, N, T>::ONE(1);
 
 		template <size_t M, size_t N, typename T>
-		const matrix<M, N, T>  matrix<M, N, T>::IDENTITY(matrix<M, N, T>::get_identity());
+		const matrix<M, N, T>  matrix<M, N, T>::IDENTITY;
 	}
 }
 

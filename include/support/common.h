@@ -10,7 +10,7 @@ namespace react
 	namespace support
 	{
 		template <typename T>
-		struct check_type
+		struct check_type_arithmetic
 		{
 			static_assert(std::is_arithmetic<T>::value, "T is arithmetic");
 			using type = T;

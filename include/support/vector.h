@@ -19,7 +19,7 @@ namespace react
 		{
 		private:
 			typename check_vec_dimension<T, S>::type cd{};
-			typename check_type<T>::type ct{};
+			typename check_type_arithmetic<T>::type ct{};
 
 		public:
 			static const size_t DIMENSION = S;

@@ -352,7 +352,6 @@ namespace react
 		T x2 = q.x() * q.x();
 		T y2 = q.y() * q.y();
 		T z2 = q.z() * q.z();
-		T w2 = q.w() * q.w();
 
 		T xy = q.x() * q.y();
 		T xz = q.x() * q.z();
@@ -362,15 +361,17 @@ namespace react
 		T wy = q.w() * q.y();
 		T wz = q.w() * q.z();
 
-		tmp(0, 0) = 1 - 2 * y2 - 2 * z2;
-		tmp(0, 1) = 2 * xy - 2 * wz;
-		tmp(0, 2) = 2 * xz + 2 * wy;
-		tmp(1, 0) = 2 * xy + 2 * wz;
-		tmp(1, 1) = 1 - 2 * x2 - 2 * z2;
-		tmp(1, 2) = 2 * yz - 2 * wx;
-		tmp(2, 0) = 2 * xz - 2 * wy;
-		tmp(2, 1) = 2 * yz + 2 * wx;
-		tmp(2, 2) = 1 - 2 * x2 - 2 * y2;
+		tmp(0, 0) = static_cast<T>(1) - static_cast<T>(2) * (y2 + z2);
+		tmp(0, 1) = static_cast<T>(2) * (xy - wz);
+		tmp(0, 2) = static_cast<T>(2) * (xz + wy);
+
+		tmp(1, 0) = static_cast<T>(2) * (xy + wz);
+		tmp(1, 1) = static_cast<T>(1) - static_cast<T>(2) * (x2 + z2);
+		tmp(1, 2) = static_cast<T>(2) * (yz - wx);
+
+		tmp(2, 0) = static_cast<T>(2) * (xz - wy);
+		tmp(2, 1) = static_cast<T>(2) * (yz + wx);
+		tmp(2, 2) = static_cast<T>(1) - static_cast<T>(2) * (x2 + y2);
 
 		return tmp;
 	}
