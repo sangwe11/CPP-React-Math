@@ -10,10 +10,12 @@ namespace react
 	{
 	public:
 		// constructors
-		vec3() : vector<3, T>() {}
-		explicit vec3(const T& a) : vector(a) {}
-		vec3(const vector& v) : vector(v) {}
+		vec3() : support::vector<3, T>() {}
+		explicit vec3(const T& a) : support::vector<3, T>(a) {}
 		vec3(const T& x, const T& y, const T& z);
+
+		template <size_t SS, typename TT>
+		vec3(const support::vector<SS, TT>& v) : support::vector<3, T>(v) {}
 
 		// Utility functions
 		const vec3<T> cross(const vec3<T>& v) const;
@@ -40,9 +42,9 @@ namespace react
 	template <typename T>
 	vec3<T>::vec3(const T& x, const T& y, const T& z)
 	{
-		m_data[0] = x;
-		m_data[1] = y;
-		m_data[2] = z;
+		this->m_data[0] = x;
+		this->m_data[1] = y;
+		this->m_data[2] = z;
 	}
 
 	template <typename T>

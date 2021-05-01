@@ -8,30 +8,18 @@
 #include <cassert>
 #include <algorithm>
 
+#include "common.h"
+
 namespace react
 {
 	namespace support
 	{
-		template<typename T, size_t S>
-		struct check_dimension
-		{
-			static_assert(S >= 2, "size_t >= 2.");
-			using type = T;
-		};
-
-		template<typename T>
-		struct check_type
-		{
-			static_assert(std::is_arithmetic<T>::value, "T is arithmetic");
-			using type = T;
-		};
-
 		template <size_t S, typename T = float>
 		class vector
 		{
 		private:
-			typename check_dimension<T, S>::type cd{};
-			typename check_type<T>::type ct{};
+			typename check_vec_dimension<T, S>::type cd{};
+			typename check_type_arithmetic<T>::type ct{};
 
 		public:
 			static const size_t DIMENSION = S;
@@ -39,17 +27,20 @@ namespace react
 
 			// SFINAE
 			template <typename TT>
-			using enable_from_vec2 = typename std::enable_if<S >= 2, TT>::type;
+			using enable_from_vec2 = typename std::enable_if<S >= 2, TT>;
 
 			template <typename TT>
-			using enable_from_vec3 = typename std::enable_if<S >= 3, TT>::type;
+			using enable_from_vec3 = typename std::enable_if<S >= 3, TT>;
 
 			template <typename TT>
-			using enable_from_vec4 = typename std::enable_if<S >= 4, TT>::type;
+			using enable_from_vec4 = typename std::enable_if<S >= 4, TT>;
 
 			// constructors
 			vector() : m_data() {}
 			explicit vector(const T& a);
+
+			template <size_t SS, typename TT>
+			explicit vector(const vector<SS, TT>& v);
 
 			template <typename TT = enable_from_vec4<T>>
 			vector(const T& x, const T& y, const T& z, const T& w);
@@ -128,8 +119,11 @@ namespace react
 			inline T& operator[](size_t index);
 			const T& operator[](size_t index) const;
 
-			const bool operator==(const vector<S, T>& v) const;
-			const bool operator!=(const vector<S, T>& v) const;
+			template <size_t SS, typename TT>
+			const bool operator==(const vector<SS, TT>& v) const;
+
+			template <size_t SS, typename TT>
+			const bool operator!=(const vector<SS, TT>& v) const;
 
 			vector<S, T>& operator++();
 			vector<S, T>& operator--();
@@ -141,6 +135,8 @@ namespace react
 
 			vector<S, T>& operator*=(const T& c);
 			vector<S, T>& operator/=(const T& c);
+			vector<S, T>& operator+=(const T& c);
+			vector<S, T>& operator-=(const T& c);
 
 			vector<S, T> operator+(const vector<S, T>& v) const;
 			vector<S, T> operator-(const vector<S, T>& v) const;
@@ -149,6 +145,8 @@ namespace react
 
 			vector<S, T> operator*(const T& c) const;
 			vector<S, T> operator/(const T& c) const;
+			vector<S, T> operator+(const T& c) const;
+			vector<S, T> operator-(const T& c) const;
 
 			friend std::ostream& operator<<(std::ostream& out, const vector<S, T>& v)
 			{
@@ -183,6 +181,16 @@ namespace react
 			m_data[1] = y;
 			m_data[2] = z;
 			m_data[3] = w;
+		}
+		
+		template <size_t S, typename T>
+		template <size_t SS, typename TT>
+		vector<S, T>::vector(const vector<SS, TT>& v) : m_data()
+		{
+			size_t MIN_DIMENSION = std::min(DIMENSION, v.DIMENSION);
+
+			for (int i = 0; i < MIN_DIMENSION; ++i)
+				m_data[i] = v[i];
 		}
 
 		template <size_t S, typename T>
@@ -313,13 +321,29 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		const bool vector<S, T>::operator==(const vector<S, T>& other) const
+		template <size_t SS, typename TT>
+		const bool vector<S, T>::operator==(const vector<SS, TT>& other) const
 		{
+			if (typeid(T) != typeid(TT))
+				return false;
+
+			if (DIMENSION != other.DIMENSION)
+				return false;
+
+#ifndef _REACT_EXACT_COMPARISON
+			for (int i = 0; i < DIMENSION; ++i)
+				if (fabs(m_data[i] - other.m_data[i]) > std::numeric_limits<T>::epsilon())
+					return false;
+
+			return true;
+#else
 			return std::memcmp(m_data, other.m_data, sizeof(m_data)) == 0;
+#endif
 		}
 
 		template <size_t S, typename T>
-		const bool vector<S, T>::operator!=(const vector<S, T>& other) const
+		template <size_t SS, typename TT>
+		const bool vector<S, T>::operator!=(const vector<SS, TT>& other) const
 		{
 			return !(*this == other);
 		}
@@ -397,26 +421,52 @@ namespace react
 		}
 
 		template <size_t S, typename T>
+		vector<S, T>& vector<S, T>::operator+=(const T& c)
+		{
+			for (int i = 0; i < this->DIMENSION; ++i)
+				m_data[i] += c;
+
+			return *this;
+		}
+
+		template <size_t S, typename T>
+		vector<S, T>& vector<S, T>::operator-=(const T& c)
+		{
+			for (int i = 0; i < this->DIMENSION; ++i)
+				m_data[i] -= c;
+
+			return *this;
+		}
+
+		template <size_t S, typename T>
 		vector<S, T> vector<S, T>::operator+(const vector<S, T>& v) const
 		{
-			vector<S, T> tmp = v;
-			tmp += *this;
+			vector<S, T> tmp = *this;
+			tmp += v;
 			return tmp;
 		}
 
 		template <size_t S, typename T>
 		vector<S, T> vector<S, T>::operator-(const vector<S, T>& v) const
 		{
-			vector<S, T> tmp = v;
-			tmp -= *this;
+			vector<S, T> tmp = *this;
+			tmp -= v;
 			return tmp;
 		}
 
 		template <size_t S, typename T>
 		vector<S, T> vector<S, T>::operator*(const vector<S, T>& v) const
 		{
-			vector<S, T> tmp = v;
-			tmp *= *this;
+			vector<S, T> tmp = *this;
+			tmp *= v;
+			return tmp;
+		}
+
+		template <size_t S, typename T>
+		vector<S, T> vector<S, T>::operator/(const vector<S, T>& v) const
+		{
+			vector<S, T> tmp = *this;
+			tmp /= v;
 			return tmp;
 		}
 
@@ -427,10 +477,35 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		vector<S, T> vector<S, T>::operator/(const vector<S, T>& v) const
+		inline vector<S, T> operator/(const T& c, const vector<S, T>& v)
 		{
-			vector<S, T> tmp = v;
-			tmp /= *this;
+			vector<S, T> tmp;
+
+			for (int i = 0; i < v.DIMENSION; ++i)
+				tmp[i] = c / v[i];
+
+			return tmp;
+		}
+
+		template <size_t S, typename T>
+		inline vector<S, T> operator+(const T& c, const vector<S, T>& v)
+		{
+			vector<S, T> tmp;
+
+			for (int i = 0; i < v.DIMENSION; ++i)
+				tmp[i] = c + v[i];
+
+			return tmp;
+		}
+
+		template <size_t S, typename T>
+		inline vector<S, T> operator-(const T& c, const vector<S, T>& v)
+		{
+			vector<S, T> tmp;
+
+			for (int i = 0; i < v.DIMENSION; ++i)
+				tmp[i] = c - v[i];
+
 			return tmp;
 		}
 
@@ -447,6 +522,22 @@ namespace react
 		{
 			vector<S, T> tmp = *this;
 			tmp /= c;
+			return tmp;
+		}
+
+		template <size_t S, typename T>
+		vector<S, T> vector<S, T>::operator+(const T& c) const
+		{
+			vector<S, T> tmp = *this;
+			tmp += c;
+			return tmp;
+		}
+
+		template <size_t S, typename T>
+		vector<S, T> vector<S, T>::operator-(const T& c) const
+		{
+			vector<S, T> tmp = *this;
+			tmp -= c;
 			return tmp;
 		}
 
@@ -501,10 +592,10 @@ namespace react
 		template <size_t S, typename T>
 		vector<S, T>& vector<S, T>::normalize()
 		{
-			T len = length;
+			T len = length();
 
 			for (int i = 0; i < this->DIMENSION; ++i)
-				m_data[i] /= len();
+				m_data[i] /= len;
 
 			return *this;
 		}
@@ -552,18 +643,18 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		static const vector<S, T> vector<S, T>::lerp(const vector<S, T>& a, const vector<S, T>& b, const T& t)
+		const vector<S, T> vector<S, T>::lerp(const vector<S, T>& a, const vector<S, T>& b, const T& t)
 		{
 			vector<S, T> tmp;
 
 			for (int i = 0; i < a.DIMENSION; ++i)
-				tmp[i] = std::lerp(a.m_data[i], b.m_data[i], t);
+				tmp[i] = a.m_data[i] + t * (b.m_data[i] - a.m_data[i]);
 
 			return tmp;
 		}
 
 		template <size_t S, typename T>
-		static const vector<S, T> vector<S, T>::max(const vector<S, T>& a, const vector<S, T>& b)
+		const vector<S, T> vector<S, T>::max(const vector<S, T>& a, const vector<S, T>& b)
 		{
 			vector<S, T> tmp;
 
@@ -574,7 +665,7 @@ namespace react
 		}
 
 		template <size_t S, typename T>
-		static const vector<S, T> vector<S, T>::min(const vector<S, T>& a, const vector<S, T>& b)
+		const vector<S, T> vector<S, T>::min(const vector<S, T>& a, const vector<S, T>& b)
 		{
 			vector<S, T> tmp;
 
@@ -601,8 +692,8 @@ namespace react
 		{
 			vector<S, T> tmp;
 
-			for (int i = 0; i < DIMENSION; ++i)
-				tmp.m_data[i] = min + (max - min) * rand() / (RAND_MAX + 1);
+			for (int i = 0; i < tmp.DIMENSION; ++i)
+				tmp[i] = react::math::random(min, max);
 
 			return tmp;			
 		}
