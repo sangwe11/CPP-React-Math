@@ -27,13 +27,13 @@ namespace react
 
 			// SFINAE
 			template <typename TT>
-			using enable_from_vec2 = typename std::enable_if<S >= 2, TT>::type;
+			using enable_from_vec2 = typename std::enable_if<S >= 2, TT>;
 
 			template <typename TT>
-			using enable_from_vec3 = typename std::enable_if<S >= 3, TT>::type;
+			using enable_from_vec3 = typename std::enable_if<S >= 3, TT>;
 
 			template <typename TT>
-			using enable_from_vec4 = typename std::enable_if<S >= 4, TT>::type;
+			using enable_from_vec4 = typename std::enable_if<S >= 4, TT>;
 
 			// constructors
 			vector() : m_data() {}
@@ -692,8 +692,8 @@ namespace react
 		{
 			vector<S, T> tmp;
 
-			for (int i = 0; i < DIMENSION; ++i)
-				tmp.m_data[i] = min + (max - min) * rand() / (RAND_MAX + 1);
+			for (int i = 0; i < tmp.DIMENSION; ++i)
+				tmp[i] = react::math::random(min, max);
 
 			return tmp;			
 		}

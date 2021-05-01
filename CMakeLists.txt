@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13.0)
 project (CPP-React-Math)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 
 option(build_example "Build example" ON)
 option(build_tests "Build tests" ON)

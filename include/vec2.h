@@ -10,12 +10,12 @@ namespace react
 	{
 	public:
 		// constructors
-		vec2() : vector<2, T>() {}
-		explicit vec2(const T& a) : vector(a) {}
+		vec2() : support::vector<2, T>() {}
+		explicit vec2(const T& a) : support::vector<2, T>(a) {}
 		vec2(const T& x, const T& y);
 
 		template <size_t SS, typename TT>
-		vec2(const vector<SS, TT>& v) : vector(v) {}
+		vec2(const support::vector<SS, TT>& v) : support::vector<2, T>(v) {}
 
 		static const vec2<T> UP;
 		static const vec2<T> DOWN;
@@ -26,8 +26,8 @@ namespace react
 	template <typename T>
 	vec2<T>::vec2(const T& x, const T& y)
 	{
-		m_data[0] = x;
-		m_data[1] = y;
+		this->m_data[0] = x;
+		this->m_data[1] = y;
 	}
 
 	template <typename T>

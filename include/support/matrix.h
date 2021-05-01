@@ -24,10 +24,10 @@ namespace react
 			typedef vector<COLS, T> col_type;
 
 			template <typename TT>
-			using enable_if_square = typename std::enable_if<ROWS == COLS, TT>::type;
+			using enable_if_square = typename std::enable_if<ROWS == COLS, TT>;
 
 			template <typename TT>
-			using enable_if_reducible = typename std::enable_if<ROWS >= 3 && COLS >= 3, TT >::type;
+			using enable_if_reducible = typename std::enable_if<ROWS >= 3 && COLS >= 3, TT>;
 
 			matrix();
 			explicit matrix(const T& a);
@@ -488,35 +488,35 @@ namespace react
 
 		template <size_t M, size_t N, typename T>
 		template <size_t NN, typename TT>
-		const static matrix<NN, NN, TT> matrix<M, N, T>::cofactors(const matrix<NN, NN, TT>& m)
+		const matrix<NN, NN, TT> matrix<M, N, T>::cofactors(const matrix<NN, NN, TT>& m)
 		{
 			return m.cofactors();
 		}
 
 		template <size_t M, size_t N, typename T>
 		template <size_t NN, typename TT>
-		const static TT matrix<M, N, T>::determinant(const matrix<NN, NN, TT>& m)
+		const TT matrix<M, N, T>::determinant(const matrix<NN, NN, TT>& m)
 		{
 			return m.determinant();
 		}
 
 		template <size_t M, size_t N, typename T>
 		template <size_t MM, size_t NN, size_t PP, typename TT>
-		const static matrix<PP, NN, TT> matrix<M, N, T>::dot(const matrix<MM, NN, TT>& a, const matrix<PP, MM, TT>& b)
+		const matrix<PP, NN, TT> matrix<M, N, T>::dot(const matrix<MM, NN, TT>& a, const matrix<PP, MM, TT>& b)
 		{
 			return a.dot(b);
 		}
 
 		template <size_t M, size_t N, typename T>
 		template <size_t NN, typename TT>
-		const static matrix<NN, NN, TT> matrix<M, N, T>::inverse(const matrix<NN, NN, TT>& m)
+		const matrix<NN, NN, TT> matrix<M, N, T>::inverse(const matrix<NN, NN, TT>& m)
 		{
 			return m.inverse();
 		}
 
 		template <size_t M, size_t N, typename T>
 		template <size_t MM, size_t NN, typename TT>
-		const static matrix<NN, MM, TT> matrix<M, N, T>::outer_product(const vector<MM, TT>& c, const vector<NN, TT>& r)
+		const matrix<NN, MM, TT> matrix<M, N, T>::outer_product(const vector<MM, TT>& c, const vector<NN, TT>& r)
 		{
 			matrix<NN, MM, TT> tmp;
 
@@ -528,7 +528,7 @@ namespace react
 		}
 
 		template <size_t M, size_t N, typename T>
-		const static matrix<N, M, T> matrix<M, N, T>::transpose(const matrix<M, N, T>& m)
+		const matrix<N, M, T> matrix<M, N, T>::transpose(const matrix<M, N, T>& m)
 		{
 			return m.transpose();
 		}
@@ -717,7 +717,7 @@ namespace react
 		template <size_t M, size_t N, typename T>
 		typename matrix<M, N, T>::row_type operator*(const matrix<M, N, T>& m, const typename matrix<M, N, T>::col_type& v)
 		{
-			matrix<M, N, T>::row_type tmp;
+			typename matrix<M, N, T>::row_type tmp;
 
 			for (int i = 0; i < matrix<M, N, T>::ROWS; ++i)
 				for (int j = 0; j < matrix<M, N, T>::COLS; ++j)
@@ -729,7 +729,7 @@ namespace react
 		template <size_t M, size_t N, typename T>
 		typename matrix<M, N, T>::row_type operator*(const matrix<M, N, T>& m, const typename matrix<M, N, T>::row_type& v)
 		{
-			matrix<M, N, T>::row_type tmp;
+			typename matrix<M, N, T>::row_type tmp;
 
 			for (int i = 0; i < matrix<M, N, T>::ROWS; ++i)
 				for (int j = 0; j < matrix<M, N, T>::COLS; ++j)
@@ -741,7 +741,7 @@ namespace react
 		template <size_t M, size_t N, typename T>
 		typename matrix<M, N, T>::col_type operator*(const typename matrix<M, N, T>::col_type& v, const matrix<M, N, T>& m)
 		{
-			matrix<M, N, T>::col_type tmp;
+			typename matrix<M, N, T>::col_type tmp;
 
 			for (int i = 0; i < matrix<M, N, T>::ROWS; ++i)
 				for (int j = 0; j < matrix<M, N, T>::COLS; ++j)
@@ -753,7 +753,7 @@ namespace react
 		template <size_t M, size_t N, typename T>
 		typename matrix<M, N, T>::col_type operator*(const typename matrix<M, N, T>::row_type& v, const matrix<M, N, T>& m)
 		{
-			matrix<M, N, T>::col_type tmp;
+			typename matrix<M, N, T>::col_type tmp;
 
 			for (int i = 0; i < matrix<M, N, T>::ROWS; ++i)
 				for (int j = 0; j < matrix<M, N, T>::COLS; ++j)

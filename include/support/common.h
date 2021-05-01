@@ -2,6 +2,8 @@
 #define _RM_COMMON_H
 
 #include <cassert>
+#include <cmath>
+#include <random>
 
 namespace react
 {
@@ -73,7 +75,7 @@ namespace react
 		}
 
 		template <template<typename> class T, typename TT>
-		const T<TT> degrees(const typename T<TT>& radians)
+		const T<TT> degrees(const T<TT>& radians)
 		{
 			return radians * (static_cast<TT>(180) / pi<TT>());
 		}
@@ -85,9 +87,59 @@ namespace react
 		}
 
 		template <template<typename> class T, typename TT>
-		const T<TT> radians(const typename T<TT>& degrees)
+		const T<TT> radians(const T<TT>& degrees)
 		{
 			return degrees / (static_cast<TT>(180) / pi<TT>());
+		}
+
+		inline std::random_device& random_device()
+		{
+			static std::random_device srd;
+
+			return srd;
+		}
+
+		inline std::mt19937& mt19937()
+		{
+			static std::mt19937 smt(react::math::random_device()());
+
+			return smt;
+		}
+
+		inline std::mt19937_64& mt19937_64()
+		{
+			static std::mt19937_64 smt(react::math::random_device()());
+
+			return smt;
+		}
+
+		inline int random(const int& min, const int& max)
+		{
+			static std::uniform_int_distribution<int> irand(min, max);
+
+			return irand(react::math::mt19937());
+		}
+
+		inline float random(const float& min, const float& max)
+		{
+			static std::uniform_real_distribution<float> frand(min, max);
+
+			return frand(react::math::mt19937());
+		}
+
+		inline double random(const double& min, const double& max)
+		{
+			static std::uniform_real_distribution<double> drand(min, max);
+
+			return drand(react::math::mt19937_64());
+		}
+
+		template <typename T>
+		inline T random(const T& min, const T& max)
+		{
+			static std::uniform_real_distribution<T> trand(min, max);
+
+			return trand(react::math::mt19937());
 		}
 	}
 }
