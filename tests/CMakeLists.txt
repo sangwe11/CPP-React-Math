@@ -11,6 +11,7 @@ add_executable(test_unit
 	tests_main.cpp
 	matrix.cpp
 	vector.cpp
+	quat.cpp
 )
 
 target_link_libraries(test_unit CPP-React-Math)

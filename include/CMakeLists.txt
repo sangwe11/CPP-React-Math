@@ -12,6 +12,7 @@ set (PROJECT_SOURCES
 	mat2.h
 	mat3.h
 	mat4.h
+	quat.h
 )
 
 target_sources(CPP-React-Math INTERFACE ${PROJECT_SOURCES})
