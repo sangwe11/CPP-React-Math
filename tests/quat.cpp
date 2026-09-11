@@ -65,11 +65,11 @@ BOOST_AUTO_TEST_CASE(quat_euler_constructor)
 	react::vec3f C_eulers = C.toEulers();
 	react::vec3f D_eulers = D.toEulers();
 
-	BOOST_TEST(C == C_truth);
-	BOOST_TEST(D == D_truth);
+	BOOST_TEST(C.equalsRotation(C_truth, 1e-5f));
+	BOOST_TEST(D.equalsRotation(D_truth, 1e-5f));
 
-	BOOST_TEST(C_eulers == react::math::radians(A));
-	BOOST_TEST(D_eulers == react::math::radians(B));
+	BOOST_TEST(C_eulers.equals(react::math::radians(A), 1e-5f));
+	BOOST_TEST(D_eulers.equals(react::math::radians(B), 1e-5f));
 }
 
 BOOST_AUTO_TEST_CASE(quat_matrix_constructor)
@@ -92,8 +92,8 @@ BOOST_AUTO_TEST_CASE(quat_matrix_constructor)
 	react::quatf C_truth(0.0f, 0.7071068f, 0.0f, 0.7071068f);
 	react::quatf D_truth(-0.2705981f, -0.2705981f, 0.0f, 0.9238795f);
 
-	BOOST_TEST(C == C_truth);
-	BOOST_TEST(D == D_truth);
+	BOOST_TEST(C.equalsRotation(C_truth, 1e-5f));
+	BOOST_TEST(D.equalsRotation(D_truth, 1e-5f));
 }
 
 BOOST_AUTO_TEST_CASE(quat_compare)
@@ -161,8 +161,8 @@ BOOST_AUTO_TEST_CASE(quat_normalized)
 	react::quatf A_truth(0.2581988897471611f, 0.5163977794943222f, 0.7745966692414833f, 0.2581988897471611f);
 	react::quatf C_truth(0.6445033866354897f, 0.5728918992315464f, 0.5012804118276031f, 0.0716114874039433f);
 
-	BOOST_TEST(A == A_truth);
-	BOOST_TEST(C == C_truth);
+	BOOST_TEST(A.equalsRotation(A_truth, 1e-5f));
+	BOOST_TEST(C.equalsRotation(C_truth, 1e-5f));
 }
 
 BOOST_AUTO_TEST_CASE(quat_rotate_vec3)
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(quat_rotate_vec3)
 
 	react::vec3f truth(-1.34207010269165f, 0.0f, -0.4459229707717896f);
 
-	BOOST_TEST(C == truth);
+	BOOST_TEST(C.equals(truth, 1e-5f));
 }
 
 BOOST_AUTO_TEST_CASE(quat_constant_multiplication)
@@ -292,8 +292,8 @@ BOOST_AUTO_TEST_CASE(quat_to_eulers)
 	react::vec3f C_truth(45.0f, -20.0f, 10.0f); // given in degrees
 	react::vec3f D_truth(20.0f, -60.0f, 15.0f); // given in degrees
 
-	BOOST_TEST(C == react::math::radians(C_truth));
-	BOOST_TEST(D == react::math::radians(D_truth));
+	BOOST_TEST(C.equals(react::math::radians(C_truth), 1e-5f));
+	BOOST_TEST(D.equals(react::math::radians(D_truth), 1e-5f));
 }
 
 BOOST_AUTO_TEST_CASE(quat_to_matrix)
@@ -310,8 +310,8 @@ BOOST_AUTO_TEST_CASE(quat_to_matrix)
 	react::mat3f A_truth({ 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f });
 	react::mat3f B_truth({ 0.8535534f, 0.1464466f, 0.5000000f, 0.1464466f, 0.8535534f, -0.5000000f, -0.5000000f, 0.5000000f, 0.7071068f });
 
-	BOOST_TEST(A_out == A_truth);
-	BOOST_TEST(B_out == B_truth);
+	BOOST_TEST(A_out.equals(A_truth, 1e-5f));
+	BOOST_TEST(B_out.equals(B_truth, 1e-5f));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

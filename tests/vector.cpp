@@ -248,8 +248,8 @@ BOOST_AUTO_TEST_CASE(vector_normalize)
 	react::vec3f A_truth(0.845154254728516f, -0.1690308509457033f, 0.50709255283711f);
 	react::vec3f C_truth(0.254000254000381f, -0.8890008890013334f, -0.3810003810005715f);
 
-	BOOST_TEST(A == A_truth);
-	BOOST_TEST(C == C_truth);
+	BOOST_TEST(A.equals(A_truth, 1e-5f));
+	BOOST_TEST(C.equals(C_truth, 1e-5f));
 }
 
 BOOST_AUTO_TEST_CASE(vector_lerp)

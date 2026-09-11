@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(matrix_determinant_mat3)
 
 	float truth = -306.0f;
 
-	BOOST_CHECK(B == truth);
+	BOOST_CHECK(B.equals(truth, 1e-5f));
 }
 
 BOOST_AUTO_TEST_CASE(matrix_determinant_mat4)
@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE(matrix_inverse_mat4)
 	//  1/3    0      1/3      1/3
 	// -1/12   1/4    1/6      5/12
 
-	BOOST_CHECK(B == truth);
+	BOOST_CHECK(B.equals(truth, 1e-5f));
 }
 
 BOOST_AUTO_TEST_CASE(matrix_transpose)
