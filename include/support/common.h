@@ -1,14 +1,31 @@
-#ifndef _RM_COMMOM_H
+#ifndef _RM_COMMON_H
 #define _RM_COMMON_H
 
 #include <cassert>
+#include <algorithm>
 #include <cmath>
+#include <limits>
 #include <random>
+#include <type_traits>
 
 namespace react
 {
 	namespace support
 	{
+		template <typename T>
+		inline bool approximately_equal(const T& a, const T& b, const T& tolerance)
+		{
+			assert(tolerance >= 0);
+			return std::fabs(a - b) <= tolerance;
+		}
+
+		template <typename T>
+		inline bool is_unit_length(const T& length_squared)
+		{
+			return std::fabs(length_squared - static_cast<T>(1)) <=
+				std::sqrt(std::numeric_limits<T>::epsilon());
+		}
+
 		template <typename T>
 		struct check_type_arithmetic
 		{
@@ -115,32 +132,25 @@ namespace react
 
 		inline int random(const int& min, const int& max)
 		{
-			static std::uniform_int_distribution<int> irand(min, max);
+			std::uniform_int_distribution<int> irand(min, max);
 
 			return irand(react::math::mt19937());
 		}
 
 		inline float random(const float& min, const float& max)
 		{
-			static std::uniform_real_distribution<float> frand(min, max);
+			std::uniform_real_distribution<float> frand(min, max);
 
 			return frand(react::math::mt19937());
 		}
 
 		inline double random(const double& min, const double& max)
 		{
-			static std::uniform_real_distribution<double> drand(min, max);
+			std::uniform_real_distribution<double> drand(min, max);
 
 			return drand(react::math::mt19937_64());
 		}
 
-		template <typename T>
-		inline T random(const T& min, const T& max)
-		{
-			static std::uniform_real_distribution<T> trand(min, max);
-
-			return trand(react::math::mt19937());
-		}
 	}
 }
 

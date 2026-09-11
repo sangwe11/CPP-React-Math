@@ -143,9 +143,9 @@ BOOST_AUTO_TEST_CASE(quat_dot)
 
 BOOST_AUTO_TEST_CASE(quat_inverse)
 {
-	react::quatf A(1.0f, 2.0f, 3.0f, 4.0f);
+	react::quatf A(react::vec3f::UP, react::math::half_pi<float>());
 
-	react::quatf truth(-0.033333333333333f, -0.066666666666667f, -0.1f, 0.133333333333333f);
+	react::quatf truth = A.conjugate();
 
 	BOOST_TEST(A.inverse() == truth);
 }
@@ -301,7 +301,7 @@ BOOST_AUTO_TEST_CASE(quat_to_matrix)
 	react::quatf A(react::vec3f(0.0f, 1.0f, 0.0f), react::math::radians(90.0f));
 	// 90 degree rotation around (0, 1, 0)
 
-	react::quatf B(react::vec3f(1.0f, 1.0f, 0.0f), react::math::radians(-45.0f));
+	react::quatf B(react::vec3f(1.0f, 1.0f, 0.0f).normalized(), react::math::radians(-45.0f));
 	// -45 degree rotation around (1, 1, 0)
 
 	react::mat3f A_out = A.toMat3();

@@ -92,9 +92,10 @@ namespace react
 	template <typename T>
 	const vec3<T> vec3<T>::slerp(const vec3<T>& a, const vec3<T>& b, const T& t)
 	{
-		T dot = dot(a, b);
-		T theta = acos(dot) * t;
-		vec3<T> relative = (b - a * dot).normalize();
+		T dot_product = a.dot(b);
+		dot_product = std::max(static_cast<T>(-1), std::min(static_cast<T>(1), dot_product));
+		T theta = acos(dot_product) * t;
+		vec3<T> relative = (b - a * dot_product).normalize();
 		return ((a * cos(theta)) + (relative * sin(theta)));
 	}
 

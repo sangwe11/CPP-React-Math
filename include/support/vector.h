@@ -125,6 +125,9 @@ namespace react
 			template <size_t SS, typename TT>
 			const bool operator!=(const vector<SS, TT>& v) const;
 
+			template <size_t SS, typename TT>
+			const bool equals(const vector<SS, TT>& v, const T& tolerance) const;
+
 			vector<S, T>& operator++();
 			vector<S, T>& operator--();
 
@@ -330,15 +333,11 @@ namespace react
 			if (DIMENSION != other.DIMENSION)
 				return false;
 
-#ifndef _REACT_EXACT_COMPARISON
 			for (int i = 0; i < DIMENSION; ++i)
-				if (fabs(m_data[i] - other.m_data[i]) > std::numeric_limits<T>::epsilon())
+				if (m_data[i] != other.m_data[i])
 					return false;
 
 			return true;
-#else
-			return std::memcmp(m_data, other.m_data, sizeof(m_data)) == 0;
-#endif
 		}
 
 		template <size_t S, typename T>
@@ -346,6 +345,20 @@ namespace react
 		const bool vector<S, T>::operator!=(const vector<SS, TT>& other) const
 		{
 			return !(*this == other);
+		}
+
+		template <size_t S, typename T>
+		template <size_t SS, typename TT>
+		const bool vector<S, T>::equals(const vector<SS, TT>& other, const T& tolerance) const
+		{
+			if (typeid(T) != typeid(TT) || DIMENSION != other.DIMENSION)
+				return false;
+
+			for (int i = 0; i < DIMENSION; ++i)
+				if (!approximately_equal(m_data[i], other.m_data[i], tolerance))
+					return false;
+
+			return true;
 		}
 
 		template <size_t S, typename T>
@@ -594,6 +607,9 @@ namespace react
 		{
 			T len = length();
 
+			if (len == 0)
+				return *this;
+
 			for (int i = 0; i < this->DIMENSION; ++i)
 				m_data[i] /= len;
 
@@ -605,7 +621,14 @@ namespace react
 		template <size_t S, typename T>
 		const T vector<S, T>::angle(const vector<S, T>& a, const vector<S, T>& b)
 		{
-			return acos(a.dot(b) / (a.length() * b.length()));
+			T len = a.length() * b.length();
+
+			if (len == 0)
+				return 0;
+
+			T cosine = a.dot(b) / len;
+			cosine = std::max(static_cast<T>(-1), std::min(static_cast<T>(1), cosine));
+			return acos(cosine);
 		}
 
 		template <size_t S, typename T>
@@ -678,13 +701,23 @@ namespace react
 		template <size_t S, typename T>
 		const vector<S, T> vector<S, T>::normalized(const vector<S, T>& a)
 		{
-			return a / a.length();
+			T len = a.length();
+
+			if (len == 0)
+				return a;
+
+			return a / len;
 		}
 
 		template <size_t S, typename T>
 		const vector<S, T> vector<S, T>::project(const vector<S, T>& a, const vector<S, T>& b)
 		{
-			return (a.dot(b) / a.length_squared()) * a;
+			T len = a.length_squared();
+
+			if (len == 0)
+				return a;
+
+			return (a.dot(b) / len) * a;
 		}
 
 		template <size_t S, typename T>

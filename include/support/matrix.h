@@ -14,6 +14,9 @@ namespace react
 			typename check_mat_dimension<T, M, N>::type cd{};
 			typename check_type_arithmetic<T>::type ct{};
 
+			const bool invertible_impl(std::true_type) const;
+			const bool invertible_impl(std::false_type) const;
+
 		public:
 			static const size_t ROWS = N;
 			static const size_t COLS = M;
@@ -103,6 +106,9 @@ namespace react
 
 			template <size_t MM, size_t NN, typename TT>
 			const bool operator!=(const matrix<MM, NN, TT>& m) const;
+
+			template <size_t MM, size_t NN, typename TT>
+			const bool equals(const matrix<MM, NN, TT>& m, const T& tolerance) const;
 
 			matrix<M, N, T>& operator++();
 			matrix<M, N, T>& operator--();
@@ -209,7 +215,7 @@ namespace react
 		const vector<matrix<M, N, T>::COLS, T> matrix<M, N, T>::row(const size_t& row_index) const
 		{
 #ifndef _REACT_NO_SAFE_ACCESSORS
-			assert(COLS > row_index);
+			assert(ROWS > row_index);
 #endif
 
 			vector<COLS, T> tmp;
@@ -224,7 +230,7 @@ namespace react
 		const vector<matrix<M, N, T>::ROWS, T> matrix<M, N, T>::col(const size_t& col_index) const
 		{
 #ifndef _REACT_NO_SAFE_ACCESSORS
-			assert(ROWS > col_index);
+			assert(COLS > col_index);
 #endif
 
 			vector<ROWS, T> tmp;
@@ -350,13 +356,19 @@ namespace react
 		template <size_t M, size_t N, typename T>
 		const bool matrix<M, N, T>::invertible() const
 		{
-			if (ROWS != COLS)
-				return false;
+			return invertible_impl(std::integral_constant<bool, ROWS == COLS>());
+		}
 
-			if (fabs(determinant()) <= 0)
-				return false;
+		template <size_t M, size_t N, typename T>
+		const bool matrix<M, N, T>::invertible_impl(std::true_type) const
+		{
+			return fabs(determinant()) > 0;
+		}
 
-			return true;
+		template <size_t M, size_t N, typename T>
+		const bool matrix<M, N, T>::invertible_impl(std::false_type) const
+		{
+			return false;
 		}
 
 		template <size_t M, size_t N, typename T>
@@ -558,15 +570,11 @@ namespace react
 			if (ROWS != m.ROWS || COLS != m.COLS)
 				return false;
 
-#ifndef _REACT_EXACT_COMPARISON
 			for (int i = 0; i < ROWS * COLS; ++i)
-				if (fabs(m_data[i] - m.m_data[i]) > std::numeric_limits<T>::epsilon())
+				if (m_data[i] != m.m_data[i])
 					return false;
 
 			return true;
-#else
-			return std::memcmp(m_data, m.m_data, sizeof(m_data)) == 0;
-#endif
 		}
 
 		template <size_t M, size_t N, typename T>
@@ -574,6 +582,20 @@ namespace react
 		const bool matrix<M, N, T>::operator!=(const matrix<MM, NN, TT>& m) const
 		{
 			return !(*this == m);
+		}
+
+		template <size_t M, size_t N, typename T>
+		template <size_t MM, size_t NN, typename TT>
+		const bool matrix<M, N, T>::equals(const matrix<MM, NN, TT>& m, const T& tolerance) const
+		{
+			if (typeid(T) != typeid(TT) || ROWS != m.ROWS || COLS != m.COLS)
+				return false;
+
+			for (int i = 0; i < ROWS * COLS; ++i)
+				if (!approximately_equal(m_data[i], m.m_data[i], tolerance))
+					return false;
+
+			return true;
 		}
 
 		template <size_t M, size_t N, typename T>
@@ -714,30 +736,6 @@ namespace react
 			for (int i = 0; i < matrix<M, N, T>::ROWS; ++i)
 				for (int j = 0; j < matrix<M, N, T>::COLS; ++j)
 					tmp[i] += m.at(i, j) * v[j];
-
-			return tmp;
-		}
-
-		template <size_t M, size_t N, typename T>
-		typename matrix<M, N, T>::row_type operator*(const matrix<M, N, T>& m, const typename matrix<M, N, T>::row_type& v)
-		{
-			typename matrix<M, N, T>::row_type tmp;
-
-			for (int i = 0; i < matrix<M, N, T>::ROWS; ++i)
-				for (int j = 0; j < matrix<M, N, T>::COLS; ++j)
-					tmp[i] += m.at(i, j) * v[i];
-
-			return tmp;
-		}
-
-		template <size_t M, size_t N, typename T>
-		typename matrix<M, N, T>::col_type operator*(const typename matrix<M, N, T>::col_type& v, const matrix<M, N, T>& m)
-		{
-			typename matrix<M, N, T>::col_type tmp;
-
-			for (int i = 0; i < matrix<M, N, T>::ROWS; ++i)
-				for (int j = 0; j < matrix<M, N, T>::COLS; ++j)
-					tmp[j] += m.at(i, j) * v[j];
 
 			return tmp;
 		}

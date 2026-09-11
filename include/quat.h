@@ -29,6 +29,7 @@ namespace react
 		quat(const T& x, const T& y, const T& z, const T& w);
 		quat(const vec4<T>& xyzw);
 
+		// Requires: axis is unit length.
 		quat(const vec3<T>& axis, const T& angle);
 		quat(const vec3<T>& eulers);
 		quat(const mat3<T>& m);
@@ -64,6 +65,7 @@ namespace react
 
 		const bool operator==(const quat<T>& b) const;
 		const bool operator!=(const quat<T>& b) const;
+		const bool equalsRotation(const quat<T>& b, const T& tolerance) const;
 
 		quat<T>& operator*=(const T& c);
 		quat<T>& operator/=(const T& c);
@@ -112,13 +114,13 @@ namespace react
 	template <typename T>
 	quat<T>::quat(const vec3<T>& axis, const T& angle)
 	{
-		vec3<T> ax = axis.normalized();
+		assert(support::is_unit_length(axis.length_squared()));
 
 		T s = sin(angle / static_cast<T>(2));
 
-		this->x() = ax.x() * s;
-		this->y() = ax.y() * s;
-		this->z() = ax.z() * s;
+		this->x() = axis.x() * s;
+		this->y() = axis.y() * s;
+		this->z() = axis.z() * s;
 		this->w() = cos(angle / static_cast<T>(2));
 	}
 
@@ -170,7 +172,7 @@ namespace react
 				x() = (m(0, 1) + m(1, 0)) / s;
 				y() = s / static_cast<T>(4);
 				z() = (m(1, 2) + m(2, 1)) / s;
-				w() = (m(0, 2) + m(2, 0)) / s;
+				w() = (m(0, 2) - m(2, 0)) / s;
 			}
 			else
 			{
@@ -241,7 +243,12 @@ namespace react
 	template <typename T>
 	quat<T>& quat<T>::normalize()
 	{
-		return *this *= (static_cast<T>(1) / length());
+		T len = length();
+
+		if (len == 0)
+			return *this = IDENTITY;
+
+		return *this *= (static_cast<T>(1) / len);
 	}
 
 	template <typename T>
@@ -253,7 +260,8 @@ namespace react
 	template <typename T>
 	const quat<T> quat<T>::inverse(const quat<T>& a)
 	{
-		return  a.conjugate() / a.length_squared();
+		assert(support::is_unit_length(a.length_squared()));
+		return a.conjugate();
 	}
 
 	template <typename T>
@@ -284,21 +292,17 @@ namespace react
 	template <typename T>
 	const void quat<T>::toAxisAngle(const quat<T>& quat_in, vec3<T>& axis_out, T& angle_out)
 	{
-		quat<T> q = quat_in;
+		const quat<T>& q = quat_in;
+		assert(support::is_unit_length(q.length_squared()));
 
-		if (q.w() > static_cast<T>(1))
-			q.normalize();
+		T w = std::max(static_cast<T>(-1), std::min(static_cast<T>(1), q.w()));
+		angle_out = static_cast<T>(2) * acos(w);
 
-		angle_out = static_cast<T>(2) * acos(q.w());
-
-		T s = sqrt(static_cast<T>(1) - q.w() * q.w());
-		T s2 = sin(angle_out / static_cast<T>(2));
+		T s = sqrt(std::max(static_cast<T>(0), static_cast<T>(1) - w * w));
 
 		if (s < std::numeric_limits<T>::epsilon())
 		{
-			axis_out.x() = q.x();
-			axis_out.y() = q.y();
-			axis_out.z() = q.z();
+			axis_out = vec3<T>::RIGHT;
 		}
 		else
 		{
@@ -306,8 +310,6 @@ namespace react
 			axis_out.y() = q.y() / s;
 			axis_out.z() = q.z() / s;
 		}
-
-		axis_out.normalize();
 	}
 
 	template <typename T>
@@ -320,7 +322,7 @@ namespace react
 	template <typename T>
 	const vec3<T> quat<T>::toEulers(const quat<T>& q)
 	{
-		react::vec3f tmp;
+		react::vec3<T> tmp;
 
 		// zyx order
 		T t0 = q.x() * q.x() - q.z() * q.z();
@@ -379,27 +381,44 @@ namespace react
 	template <typename T>
 	const quat<T> quat<T>::normalized(const quat<T>& a)
 	{
-		return a * (static_cast<T>(1) / a.length());
+		T len = a.length();
+
+		if (len == 0)
+			return IDENTITY;
+
+		return a * (static_cast<T>(1) / len);
 	}
 
 	template <typename T>
 	const bool quat<T>::operator==(const quat<T>& b) const
 	{
-#ifndef _REACT_EXACT_COMPARISON
 		for (int i = 0; i < this->DIMENSION; ++i)
-			if (fabs(m_data[i] - b.m_data[i]) > std::numeric_limits<T>::epsilon())
+			if (m_data[i] != b.m_data[i])
 				return false;
 
 		return true;
-#else
-		return std::memcmp(m_data, b.m_data, sizeof(m_data)) == 0;
-#endif
 	}
 
 	template <typename T>
 	const bool quat<T>::operator!=(const quat<T>& b) const
 	{
 		return !(*this == b);
+	}
+
+	template <typename T>
+	const bool quat<T>::equalsRotation(const quat<T>& b, const T& tolerance) const
+	{
+		for (int i = 0; i < this->DIMENSION; ++i)
+			if (!support::approximately_equal(m_data[i], b.m_data[i], tolerance))
+				break;
+			else if (i == this->DIMENSION - 1)
+				return true;
+
+		for (int i = 0; i < this->DIMENSION; ++i)
+			if (!support::approximately_equal(m_data[i], -b.m_data[i], tolerance))
+				return false;
+
+		return true;
 	}
 
 	template <typename T>
