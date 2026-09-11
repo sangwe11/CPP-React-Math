@@ -314,4 +314,45 @@ BOOST_AUTO_TEST_CASE(quat_to_matrix)
 	BOOST_TEST(B_out.equals(B_truth, 1e-5f));
 }
 
+BOOST_AUTO_TEST_CASE(quat_safe_and_rotation_invariants)
+{
+	react::quatf zero = react::quatf::ZERO;
+	zero.normalize();
+
+	BOOST_TEST(zero == react::quatf::IDENTITY);
+	BOOST_TEST(react::quatf::ZERO.normalized() == react::quatf::IDENTITY);
+
+	react::quatf q(react::vec3f::UP, react::math::half_pi<float>());
+	BOOST_TEST((q * q.inverse()).equalsRotation(react::quatf::IDENTITY, 1e-5f));
+	BOOST_TEST(q.rotate(react::vec3f(1.0f, 2.0f, 3.0f)).equals(
+		react::vec3f(q.toMat3() * react::vec3f(1.0f, 2.0f, 3.0f)), 1e-5f));
+}
+
+BOOST_AUTO_TEST_CASE(quat_rotation_matrix_round_trips)
+{
+	const react::vec3f axes[] = { react::vec3f::RIGHT, react::vec3f::UP, react::vec3f::BACK };
+
+	for (const react::vec3f& axis : axes)
+	{
+		react::quatf q(axis, react::math::pi<float>());
+		react::quatf from_matrix(q.toMat3());
+		BOOST_TEST(q.equalsRotation(from_matrix, 1e-5f));
+	}
+}
+
+BOOST_AUTO_TEST_CASE(quat_rotation_comparison_and_identity_axis_angle)
+{
+	react::quatf q(react::vec3f::UP, react::math::half_pi<float>());
+	react::quatf negated = q * -1.0f;
+
+	BOOST_TEST(q != negated);
+	BOOST_TEST(q.equalsRotation(negated, 1e-5f));
+
+	react::vec3f axis;
+	float angle = -1.0f;
+	react::quatf::IDENTITY.toAxisAngle(axis, angle);
+	BOOST_TEST(axis == react::vec3f::RIGHT);
+	BOOST_TEST(angle == 0.0f);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -645,4 +645,34 @@ BOOST_AUTO_TEST_CASE(matrix_set_col)
 	BOOST_TEST(B == B_truth);
 }
 
+BOOST_AUTO_TEST_CASE(matrix_game_engine_edge_cases)
+{
+	react::mat3x2f rectangular({ 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f });
+	react::support::vector<3, float> row = rectangular.row(1);
+	react::support::vector<2, float> col = rectangular.col(2);
+	react::vec3f expected_row(2.0f, 4.0f, 6.0f);
+	react::vec2f expected_col(5.0f, 6.0f);
+
+	BOOST_TEST(!rectangular.invertible());
+	BOOST_TEST(row == expected_row);
+	BOOST_TEST(col == expected_col);
+
+	react::mat3f singular(0.0f);
+	BOOST_TEST(singular.inverse() == react::mat3f::ZERO);
+}
+
+BOOST_AUTO_TEST_CASE(matrix_transform_point_and_direction)
+{
+	react::mat4f transform;
+	transform(0, 3) = 10.0f;
+	transform(1, 3) = -5.0f;
+	transform(2, 3) = 2.0f;
+
+	react::vec4f point(transform * react::vec4f(1.0f, 2.0f, 3.0f, 1.0f));
+	react::vec4f direction(transform * react::vec4f(1.0f, 2.0f, 3.0f, 0.0f));
+
+	BOOST_TEST(point.equals(react::vec4f(11.0f, -3.0f, 5.0f, 1.0f), 1e-5f));
+	BOOST_TEST(direction.equals(react::vec4f(1.0f, 2.0f, 3.0f, 0.0f), 1e-5f));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -447,4 +447,60 @@ BOOST_AUTO_TEST_CASE(vector_division)
 	BOOST_TEST(E == E_truth);
 }
 
+BOOST_AUTO_TEST_CASE(vector_game_physics_operations)
+{
+	react::vec3f velocity(2.0f, -3.0f, 4.0f);
+
+	BOOST_TEST(react::vec3f::RIGHT.cross(react::vec3f::UP) == react::vec3f::BACK);
+	BOOST_TEST(react::vec3f::UP.cross(react::vec3f::RIGHT) == react::vec3f(0.0f, 0.0f, -1.0f));
+	BOOST_TEST(velocity.reflect(react::vec3f::UP).equals(react::vec3f(2.0f, 3.0f, 4.0f), 1e-5f));
+	BOOST_TEST(velocity.project_on_plane(react::vec3f::UP).equals(react::vec3f(2.0f, 0.0f, 4.0f), 1e-5f));
+}
+
+BOOST_AUTO_TEST_CASE(vector_safe_degenerate_cases)
+{
+	react::vec3f zero = react::vec3f::ZERO;
+
+	zero.normalize();
+	BOOST_TEST(zero == react::vec3f::ZERO);
+	BOOST_TEST(react::vec3f::ZERO.normalized() == react::vec3f::ZERO);
+	BOOST_TEST(react::vec3f::ZERO.angle(react::vec3f::RIGHT) == 0.0f);
+	BOOST_TEST(react::vec3f::ZERO.project(react::vec3f::RIGHT) == react::vec3f::ZERO);
+}
+
+BOOST_AUTO_TEST_CASE(vector_slerp_endpoints)
+{
+	react::vec3f from = react::vec3f::RIGHT;
+	react::vec3f to = react::vec3f::UP;
+
+	BOOST_TEST(from.slerp(to, 0.0f).equals(from, 1e-5f));
+	BOOST_TEST(from.slerp(to, 1.0f).equals(to, 1e-5f));
+	BOOST_TEST(from.slerp(to, 0.5f).equals(react::vec3f(std::sqrt(0.5f), std::sqrt(0.5f), 0.0f), 1e-5f));
+}
+
+BOOST_AUTO_TEST_CASE(vector_comparison_semantics)
+{
+	react::vec3f value(1.0f, 2.0f, 3.0f);
+	react::vec3f one_ulp(std::nextafter(1.0f, 2.0f), 2.0f, 3.0f);
+	react::vec3f far(1000001.0f, 0.0f, 0.0f);
+
+	BOOST_TEST(value != one_ulp);
+	BOOST_TEST(value.equals(one_ulp, 1e-5f));
+	BOOST_TEST(!react::vec3f(1000000.0f, 0.0f, 0.0f).equals(far, 1e-5f));
+}
+
+BOOST_AUTO_TEST_CASE(vector_random_range_changes)
+{
+	for (int i = 0; i < 100; ++i)
+	{
+		int first = react::math::random(1, 3);
+		int second = react::math::random(20, 30);
+
+		BOOST_TEST(first >= 1);
+		BOOST_TEST(first <= 3);
+		BOOST_TEST(second >= 20);
+		BOOST_TEST(second <= 30);
+	}
+}
+
 BOOST_AUTO_TEST_SUITE_END()

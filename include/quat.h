@@ -41,7 +41,7 @@ namespace react
 		const quat<T> inverse() const;
 		const quat<T> normalized() const;
 		const vec3<T> rotate(const vec3<T> v) const;
-		const void toAxisAngle(vec3<T>& axis_out, T& angle_out);
+		void toAxisAngle(vec3<T>& axis_out, T& angle_out) const;
 		const vec3<T> toEulers() const;
 		const mat3<T> toMat3() const;
 
@@ -55,7 +55,7 @@ namespace react
 		const static vec3<T> rotate(const quat<T>& q, const vec3<T>& v);
 
 		const static quat<T> fromAxisAngle(const vec3<T>& axis, const T& angle);
-		const static void toAxisAngle(const quat<T> &q, vec3<T>& axis_out, T& angle_out);
+		static void toAxisAngle(const quat<T> &q, vec3<T>& axis_out, T& angle_out);
 
 		const static quat<T> fromEulers(const vec3<T>& e);
 		const static vec3<T> toEulers(const quat<T>& q);
@@ -223,7 +223,7 @@ namespace react
 	}
 
 	template <typename T>
-	const void quat<T>::toAxisAngle(vec3<T>& axis_out, T& angle_out)
+	void quat<T>::toAxisAngle(vec3<T>& axis_out, T& angle_out) const
 	{
 		return toAxisAngle(*this, axis_out, angle_out);
 	}
@@ -290,7 +290,7 @@ namespace react
 	}
 
 	template <typename T>
-	const void quat<T>::toAxisAngle(const quat<T>& quat_in, vec3<T>& axis_out, T& angle_out)
+	void quat<T>::toAxisAngle(const quat<T>& quat_in, vec3<T>& axis_out, T& angle_out)
 	{
 		const quat<T>& q = quat_in;
 		assert(support::is_unit_length(q.length_squared()));
