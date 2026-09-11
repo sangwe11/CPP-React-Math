@@ -92,11 +92,44 @@ namespace react
 	template <typename T>
 	const vec3<T> vec3<T>::slerp(const vec3<T>& a, const vec3<T>& b, const T& t)
 	{
-		T dot_product = a.dot(b);
-		dot_product = std::max(static_cast<T>(-1), std::min(static_cast<T>(1), dot_product));
-		T theta = acos(dot_product) * t;
-		vec3<T> relative = (b - a * dot_product).normalize();
-		return ((a * cos(theta)) + (relative * sin(theta)));
+		const T epsilon = std::numeric_limits<T>::epsilon() * static_cast<T>(10);
+		const T a_length = a.length();
+		const T b_length = b.length();
+
+		// Spherical interpolation has no direction to interpolate from or to here.
+		// Match Unity's forgiving behaviour and use ordinary linear interpolation.
+		if (a_length <= epsilon || b_length <= epsilon)
+			return a.lerp(b, t);
+
+		const vec3<T> a_normalized = a / a_length;
+		const vec3<T> b_normalized = b / b_length;
+		const T dot_product = std::max(static_cast<T>(-1),
+			std::min(static_cast<T>(1), a_normalized.dot(b_normalized)));
+		const T length = a_length + (b_length - a_length) * t;
+
+		// Nearly parallel directions are more accurately handled by lerp.
+		if (dot_product >= static_cast<T>(1) - epsilon)
+			return a.lerp(b, t);
+
+		if (dot_product <= static_cast<T>(-1) + epsilon)
+		{
+			// Choose the least-aligned cardinal direction, producing a stable,
+			// deterministic axis perpendicular to a_normalized.
+			const T abs_x = std::fabs(a_normalized.x());
+			const T abs_y = std::fabs(a_normalized.y());
+			const T abs_z = std::fabs(a_normalized.z());
+			const vec3<T> basis = abs_x <= abs_y && abs_x <= abs_z ? RIGHT :
+				(abs_y <= abs_z ? UP : BACK);
+			const vec3<T> axis = a_normalized.cross(basis).normalized();
+			const T theta = math::pi<T>() * t;
+			return (a_normalized * std::cos(theta) + axis.cross(a_normalized) * std::sin(theta)) * length;
+		}
+
+		const T theta = std::acos(dot_product);
+		const T sin_theta = std::sin(theta);
+		const T a_weight = std::sin((static_cast<T>(1) - t) * theta) / sin_theta;
+		const T b_weight = std::sin(t * theta) / sin_theta;
+		return (a_normalized * a_weight + b_normalized * b_weight) * length;
 	}
 
 	template <typename T>

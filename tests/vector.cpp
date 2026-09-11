@@ -478,6 +478,20 @@ BOOST_AUTO_TEST_CASE(vector_slerp_endpoints)
 	BOOST_TEST(from.slerp(to, 0.5f).equals(react::vec3f(std::sqrt(0.5f), std::sqrt(0.5f), 0.0f), 1e-5f));
 }
 
+BOOST_AUTO_TEST_CASE(vector_slerp_unity_style_degenerate_cases)
+{
+	// Unity falls back to a linear interpolation when either input has no direction.
+	BOOST_TEST(react::vec3f(0.0f, 0.0f, 0.0f).slerp(react::vec3f::RIGHT, 0.5f).equals(react::vec3f(0.5f, 0.0f, 0.0f), 1e-5f));
+
+	// Opposite directions use a deterministic perpendicular axis.  RIGHT to LEFT
+	// therefore travels through UP in this library's right-handed basis.
+	BOOST_TEST(react::vec3f::RIGHT.slerp(react::vec3f::LEFT, 0.5f).equals(react::vec3f::UP, 1e-5f));
+
+	// Like Unity, direction is slerped while magnitude is linearly interpolated.
+	const react::vec3f midpoint = react::vec3f(2.0f, 0.0f, 0.0f).slerp(react::vec3f(0.0f, 4.0f, 0.0f), 0.5f);
+	BOOST_TEST(midpoint.equals(react::vec3f(std::sqrt(4.5f), std::sqrt(4.5f), 0.0f), 1e-5f));
+}
+
 BOOST_AUTO_TEST_CASE(vector_comparison_semantics)
 {
 	react::vec3f value(1.0f, 2.0f, 3.0f);
